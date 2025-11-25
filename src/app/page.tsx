@@ -166,11 +166,16 @@ export default function HomePage() {
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories
                   .filter((category) => category.name && category.name.trim() !== "")
-                  .map((category) => (
-                    <SelectItem key={category._id} value={category.name}>
-                      {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                    </SelectItem>
-                  ))}
+                  .map((category) => {
+                    const categoryValue = category.name?.trim() || "";
+                    if (!categoryValue) return null;
+                    return (
+                      <SelectItem key={category._id} value={categoryValue}>
+                        {categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1)}
+                      </SelectItem>
+                    );
+                  })
+                  .filter(Boolean)}
               </SelectContent>
             </Select>
             <Select

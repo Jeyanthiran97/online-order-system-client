@@ -159,11 +159,16 @@ export default function AdminOrdersPage() {
                             <SelectValue placeholder="Assign" />
                           </SelectTrigger>
                           <SelectContent>
-                            {deliverers.map((deliverer, idx) => (
-                              <SelectItem key={deliverer._id || `deliverer-${idx}`} value={deliverer._id}>
-                                {deliverer.fullName}
-                              </SelectItem>
-                            ))}
+                            {deliverers
+                              .filter((deliverer) => {
+                                const id = deliverer._id;
+                                return id && String(id).trim() !== "";
+                              })
+                              .map((deliverer, idx) => (
+                                <SelectItem key={deliverer._id || `deliverer-${idx}`} value={String(deliverer._id)}>
+                                  {deliverer.fullName}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       )}

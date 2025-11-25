@@ -79,11 +79,16 @@ export default function AdminProductsPage() {
               <SelectItem value="all">All Categories</SelectItem>
               {categories
                 .filter((category) => category.name && category.name.trim() !== "")
-                .map((category) => (
-                  <SelectItem key={category._id} value={category.name}>
-                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                  </SelectItem>
-                ))}
+                .map((category) => {
+                  const categoryValue = category.name?.trim() || "";
+                  if (!categoryValue) return null;
+                  return (
+                    <SelectItem key={category._id} value={categoryValue}>
+                      {categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1)}
+                    </SelectItem>
+                  );
+                })
+                .filter(Boolean)}
             </SelectContent>
           </Select>
           <Select value={sellerFilter || "all"} onValueChange={(value) => setSellerFilter(value === "all" ? "" : value)}>
@@ -92,11 +97,16 @@ export default function AdminProductsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Sellers</SelectItem>
-              {sellers.map((seller) => (
-                <SelectItem key={seller._id} value={seller._id}>
-                  {seller.shopName}
-                </SelectItem>
-              ))}
+              {sellers
+                .filter((seller) => {
+                  const id = seller._id;
+                  return id && String(id).trim() !== "";
+                })
+                .map((seller) => (
+                  <SelectItem key={seller._id} value={String(seller._id)}>
+                    {seller.shopName}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
