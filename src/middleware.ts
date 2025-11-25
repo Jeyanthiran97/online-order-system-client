@@ -8,7 +8,32 @@ export function middleware(request: NextRequest) {
 
   // Public routes
   const publicRoutes = ["/", "/auth/login", "/auth/signup", "/seller/register", "/deliverer/register", "/products"];
-  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+  const isPublicRoute = publicRoutes.some((route) => pathname === route || pathname.startsWith(route + "/"));
+  
+  // If accessing public route and authenticated, check if user should be redirected
+  if (isPublicRoute && token && userCookie) {
+    try {
+      const user = JSON.parse(userCookie);
+      const role = user.role;
+      
+      // Redirect sellers, deliverers, and admins away from public routes
+      if (role === "seller") {
+        return NextResponse.redirect(new URL("/seller", request.url));
+      }
+      if (role === "deliverer") {
+        return NextResponse.redirect(new URL("/deliverer", request.url));
+      }
+      if (role === "admin") {
+        return NextResponse.redirect(new URL("/admin", request.url));
+      }
+      // Customers can access public routes
+    } catch {
+      // Invalid user cookie, allow access
+    }
+  }
+  
+  // Allow public routes for unauthenticated users or customers
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
@@ -68,6 +93,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
+    "/products/:path*",
     "/customer/:path*",
     "/seller/:path*",
     "/deliverer/:path*",

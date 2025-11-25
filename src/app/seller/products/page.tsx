@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { productService, Product } from "@/services/productService";
+import { categoryService, Category } from "@/services/categoryService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -14,6 +16,7 @@ import { formatCurrency } from "@/lib/utils";
 
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -27,8 +30,20 @@ export default function SellerProductsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    loadCategories();
     loadProducts();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const response = await categoryService.getCategories();
+      if (response.success) {
+        setCategories(response.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load categories", error);
+    }
+  };
 
   const loadProducts = async () => {
     setLoading(true);
@@ -145,13 +160,23 @@ export default function SellerProductsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
+                  <Label htmlFor="category">Category *</Label>
+                  <Select
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
                     required
-                  />
+                  >
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category._id} value={category.name}>
+                          {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">
@@ -231,7 +256,7 @@ export default function SellerProductsPage() {
                 {products.map((product) => (
                   <TableRow key={product._id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
+                    <TableCell className="capitalize">{product.category}</TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>

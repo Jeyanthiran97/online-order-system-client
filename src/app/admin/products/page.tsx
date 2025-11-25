@@ -3,24 +3,57 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { productService, Product } from "@/services/productService";
+import { adminService, Seller } from "@/services/adminService";
+import { categoryService, Category } from "@/services/categoryService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [sellerFilter, setSellerFilter] = useState<string>("");
+
+  useEffect(() => {
+    loadSellers();
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     loadProducts();
-  }, [categoryFilter]);
+  }, [categoryFilter, sellerFilter]);
+
+  const loadSellers = async () => {
+    try {
+      const response = await adminService.getSellers({ status: "approved" });
+      if (response.success) {
+        setSellers(response.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load sellers", error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await categoryService.getCategories();
+      if (response.success) {
+        setCategories(response.data || []);
+      }
+    } catch (error) {
+      console.error("Failed to load categories", error);
+    }
+  };
 
   const loadProducts = async () => {
     setLoading(true);
     try {
       const response = await productService.getProducts({
         ...(categoryFilter && { category: categoryFilter }),
+        ...(sellerFilter && { sellerId: sellerFilter }),
         sort: "-updatedAt",
       });
       if (response.success) {
@@ -37,19 +70,34 @@ export default function AdminProductsPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Products</h1>
-        <Select value={categoryFilter || "all"} onValueChange={(value) => setCategoryFilter(value === "all" ? "" : value)}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="electronics">Electronics</SelectItem>
-            <SelectItem value="clothing">Clothing</SelectItem>
-            <SelectItem value="food">Food</SelectItem>
-            <SelectItem value="books">Books</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-4">
+          <Select value={categoryFilter || "all"} onValueChange={(value) => setCategoryFilter(value === "all" ? "" : value)}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category._id} value={category.name}>
+                  {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={sellerFilter || "all"} onValueChange={(value) => setSellerFilter(value === "all" ? "" : value)}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filter by seller" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sellers</SelectItem>
+              {sellers.map((seller) => (
+                <SelectItem key={seller._id} value={seller._id}>
+                  {seller.shopName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card>
@@ -77,7 +125,7 @@ export default function AdminProductsPage() {
                 {products.map((product, index) => (
                   <TableRow key={product._id || `product-${index}`}>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
+                    <TableCell className="capitalize">{product.category}</TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>{product.seller?.shopName || "N/A"}</TableCell>

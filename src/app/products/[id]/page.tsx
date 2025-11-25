@@ -17,7 +17,7 @@ import { formatCurrency } from "@/lib/utils";
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -25,10 +25,29 @@ export default function ProductDetailPage() {
   const [ordering, setOrdering] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
+    // Redirect sellers, deliverers, and admins away from public routes
+    if (!authLoading && isAuthenticated && user) {
+      if (user.role === "seller") {
+        router.push("/seller");
+        return;
+      }
+      if (user.role === "deliverer") {
+        router.push("/deliverer");
+        return;
+      }
+      if (user.role === "admin") {
+        router.push("/admin");
+        return;
+      }
+    }
+  }, [isAuthenticated, user, authLoading, router]);
+
+  useEffect(() => {
+    // Only load product if user is not a seller/deliverer/admin
+    if (params.id && (!authLoading && (!isAuthenticated || user?.role === "customer"))) {
       loadProduct();
     }
-  }, [params.id]);
+  }, [params.id, authLoading, isAuthenticated, user]);
 
   const loadProduct = async () => {
     try {
@@ -94,6 +113,16 @@ export default function ProductDetailPage() {
       setOrdering(false);
     }
   };
+
+  // Show loading or redirect if user is seller/deliverer/admin
+  if (authLoading || (isAuthenticated && user && (user.role === "seller" || user.role === "deliverer" || user.role === "admin"))) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

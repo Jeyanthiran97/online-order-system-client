@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Package, ShoppingCart, Truck, Users, BarChart3, Settings } from "lucide-react";
+import { LogOut, LayoutDashboard, Package, ShoppingCart, Truck, Users, BarChart3, Settings, FolderTree } from "lucide-react";
 
 interface SidebarItem {
   title: string;
@@ -29,6 +29,7 @@ const adminItems: SidebarItem[] = [
   { title: "Users", href: "/admin/users", icon: Users },
   { title: "Sellers", href: "/admin/sellers", icon: Package },
   { title: "Deliverers", href: "/admin/deliverers", icon: Truck },
+  { title: "Categories", href: "/admin/categories", icon: FolderTree },
   { title: "Products", href: "/admin/products", icon: Package },
   { title: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { title: "Analytics", href: "/admin/analytics", icon: BarChart3 },

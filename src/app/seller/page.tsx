@@ -34,19 +34,21 @@ export default function SellerDashboard() {
       if (productsRes.success) {
         const productsData = productsRes.data || [];
         setProducts(productsData);
-        setStats((prev) => ({ ...prev, totalProducts: productsData.length }));
+        // Get total count from API response, not just the limited results
+        const totalProducts = productsRes.total || productsData.length;
+        setStats((prev) => ({ ...prev, totalProducts }));
       }
 
       if (ordersRes.success) {
         const ordersData = ordersRes.data || [];
         setOrders(ordersData);
         const totalSales = ordersData.reduce((sum: number, o: Order) => sum + o.totalAmount, 0);
-        setStats({
-          totalProducts: products.length,
+        setStats((prev) => ({
+          ...prev,
           totalOrders: ordersData.length,
           totalSales,
           pendingOrders: ordersData.filter((o: Order) => o.status === "pending").length,
-        });
+        }));
       }
     } catch (error) {
       console.error("Failed to load data", error);
