@@ -77,14 +77,23 @@ export default function SellerProductsPage() {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      // Transform form data (strings) to API format (numbers)
+      const apiData = {
+        name: data.name,
+        description: data.description,
+        price: typeof data.price === "string" ? parseFloat(data.price) : data.price,
+        stock: typeof data.stock === "string" ? parseInt(data.stock, 10) : data.stock,
+        category: data.category,
+      };
+
       if (editingProduct) {
-        await productService.updateProduct(editingProduct._id, data);
+        await productService.updateProduct(editingProduct._id, apiData);
         toast({
           title: "Success",
           description: "Product updated successfully",
         });
       } else {
-        await productService.createProduct(data);
+        await productService.createProduct(apiData);
         toast({
           title: "Success",
           description: "Product created successfully",

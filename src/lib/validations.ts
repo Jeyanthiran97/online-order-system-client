@@ -95,19 +95,37 @@ export const productFormSchema = z.object({
     .min(10, "Description must be at least 10 characters"),
   price: z
     .union([z.string(), z.number()])
-    .transform((val) => (typeof val === "string" ? parseFloat(val) : val))
+    .transform((val) => {
+      if (typeof val === "string") {
+        const parsed = parseFloat(val);
+        if (isNaN(parsed)) {
+          throw new Error("Price must be a valid number");
+        }
+        return parsed;
+      }
+      return val;
+    })
     .pipe(
       z
-        .number({ required_error: "Price is required", invalid_type_error: "Price must be a valid number" })
+        .number()
         .min(0, "Price must be greater than or equal to 0")
-        .positive("Price must be greater than 0")
+        .refine((val) => val > 0, "Price must be greater than 0")
     ),
   stock: z
     .union([z.string(), z.number()])
-    .transform((val) => (typeof val === "string" ? parseInt(val, 10) : val))
+    .transform((val) => {
+      if (typeof val === "string") {
+        const parsed = parseInt(val, 10);
+        if (isNaN(parsed)) {
+          throw new Error("Stock must be a valid number");
+        }
+        return parsed;
+      }
+      return val;
+    })
     .pipe(
       z
-        .number({ required_error: "Stock is required", invalid_type_error: "Stock must be a valid number" })
+        .number()
         .int("Stock must be a whole number")
         .min(0, "Stock must be greater than or equal to 0")
     ),
@@ -116,7 +134,17 @@ export const productFormSchema = z.object({
     .min(1, "Category is required"),
 });
 
-export type ProductFormData = z.infer<typeof productFormSchema>;
+// Input type for react-hook-form (accepts strings for price/stock)
+export type ProductFormData = {
+  name: string;
+  description: string;
+  price: string | number;
+  stock: string | number;
+  category: string;
+};
+
+// Output type after validation (numbers)
+export type ProductFormDataOutput = z.infer<typeof productFormSchema>;
 
 // Category validation
 export const categorySchema = z.object({

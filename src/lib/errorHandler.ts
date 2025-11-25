@@ -1,4 +1,4 @@
-import { FieldErrors, UseFormSetError } from "react-hook-form";
+import { FieldErrors, UseFormSetError, Path } from "react-hook-form";
 import { AxiosError } from "axios";
 
 export interface ServerErrorResponse {
@@ -31,7 +31,7 @@ export function mapServerErrorsToFields<T extends Record<string, any>>(
   // Handle field-specific errors
   if (response.errors && typeof response.errors === "object") {
     Object.entries(response.errors).forEach(([field, messages]) => {
-      const formField = (fieldMap?.[field] || field) as keyof T;
+      const formField = (fieldMap?.[field] || field) as Path<T>;
       const message = Array.isArray(messages) ? messages[0] : messages;
       
       if (message) {
@@ -50,7 +50,7 @@ export function mapServerErrorsToFields<T extends Record<string, any>>(
     const fieldMatch = response.error.match(/(\w+)\s+(is required|must be|should be|invalid)/i);
     if (fieldMatch && fieldMatch[1]) {
       const fieldName = fieldMatch[1].toLowerCase();
-      const formField = (fieldMap?.[fieldName] || fieldName) as keyof T;
+      const formField = (fieldMap?.[fieldName] || fieldName) as Path<T>;
       setError(formField, {
         type: "server",
         message: response.error,
