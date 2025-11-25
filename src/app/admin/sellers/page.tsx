@@ -7,13 +7,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Edit, CheckCircle, XCircle } from "lucide-react";
 
 export default function AdminSellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [rejectReason, setRejectReason] = useState<{ [key: string]: string }>({});
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    type: "approve" | "reject" | null;
+    sellerId: string | null;
+    sellerName: string;
+    currentReason?: string;
+  }>({
+    open: false,
+    type: null,
+    sellerId: null,
+    sellerName: "",
+    currentReason: "",
+  });
+  const [modalReason, setModalReason] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -28,7 +50,25 @@ export default function AdminSellersPage() {
         sort: "-createdAt",
       });
       if (response.success) {
-        setSellers(response.data || []);
+        // API returns sellers with userId populated, so email is at seller.userId.email
+        const sellersData = (response.data || []).map((seller: any) => ({
+          _id: seller._id,
+          userId: seller.userId,
+          shopName: seller.shopName,
+          status: seller.status,
+          reason: seller.reason,
+          verifiedAt: seller.verifiedAt,
+          createdAt: seller.createdAt,
+          updatedAt: seller.updatedAt,
+          // Extract user email from populated userId
+          user: seller.userId ? {
+            email: seller.userId.email,
+            _id: seller.userId._id,
+            role: seller.userId.role,
+            isActive: seller.userId.isActive,
+          } : null,
+        }));
+        setSellers(sellersData);
       }
     } catch (error) {
       console.error("Failed to load sellers", error);
@@ -37,28 +77,32 @@ export default function AdminSellersPage() {
     }
   };
 
-  const handleApprove = async (id: string) => {
-    try {
-      const response = await adminService.approveSeller(id);
-      if (response.success) {
-        toast({
-          title: "Success",
-          description: "Seller approved successfully",
-        });
-        loadSellers();
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to approve seller",
-        variant: "destructive",
-      });
-    }
+  const openStatusModal = (seller: Seller, type: "approve" | "reject") => {
+    setStatusModal({
+      open: true,
+      type,
+      sellerId: seller._id,
+      sellerName: seller.shopName,
+      currentReason: seller.reason || "",
+    });
+    setModalReason(seller.reason || "");
   };
 
-  const handleReject = async (id: string) => {
-    const reason = rejectReason[id];
-    if (!reason) {
+  const closeStatusModal = () => {
+    setStatusModal({
+      open: false,
+      type: null,
+      sellerId: null,
+      sellerName: "",
+      currentReason: "",
+    });
+    setModalReason("");
+  };
+
+  const handleStatusChange = async () => {
+    if (!statusModal.sellerId || !statusModal.type) return;
+
+    if (statusModal.type === "reject" && !modalReason.trim()) {
       toast({
         title: "Error",
         description: "Please provide a reason for rejection",
@@ -68,19 +112,25 @@ export default function AdminSellersPage() {
     }
 
     try {
-      const response = await adminService.rejectSeller(id, reason);
+      let response;
+      if (statusModal.type === "approve") {
+        response = await adminService.approveSeller(statusModal.sellerId);
+      } else {
+        response = await adminService.rejectSeller(statusModal.sellerId, modalReason);
+      }
+
       if (response.success) {
         toast({
           title: "Success",
-          description: "Seller rejected successfully",
+          description: `Seller ${statusModal.type === "approve" ? "approved" : "rejected"} successfully`,
         });
-        setRejectReason({ ...rejectReason, [id]: "" });
+        closeStatusModal();
         loadSellers();
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to reject seller",
+        description: error.response?.data?.error || `Failed to ${statusModal.type} seller`,
         variant: "destructive",
       });
     }
@@ -90,12 +140,12 @@ export default function AdminSellersPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Sellers</h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
@@ -124,10 +174,10 @@ export default function AdminSellersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sellers.map((seller) => (
-                  <TableRow key={seller._id}>
+                {sellers.map((seller, index) => (
+                  <TableRow key={seller._id || `seller-${index}`}>
                     <TableCell className="font-medium">{seller.shopName}</TableCell>
-                    <TableCell>{seller.user?.email || "N/A"}</TableCell>
+                    <TableCell>{seller.userId?.email || seller.user?.email || "N/A"}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
@@ -141,35 +191,64 @@ export default function AdminSellersPage() {
                         {seller.status}
                       </span>
                     </TableCell>
-                    <TableCell>{seller.reason || "-"}</TableCell>
                     <TableCell>
-                      {seller.status === "pending" && (
-                        <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
+                        <span>{seller.reason || "-"}</span>
+                        {seller.reason && (
                           <Button
                             size="sm"
-                            onClick={() => handleApprove(seller._id)}
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => openStatusModal(seller, "reject")}
+                            title="Edit reason"
                           >
-                            Approve
+                            <Edit className="h-3 w-3" />
                           </Button>
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Rejection reason"
-                              value={rejectReason[seller._id] || ""}
-                              onChange={(e) =>
-                                setRejectReason({ ...rejectReason, [seller._id]: e.target.value })
-                              }
-                              className="w-40"
-                            />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {seller.status === "pending" && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => openStatusModal(seller, "approve")}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => handleReject(seller._id)}
+                              onClick={() => openStatusModal(seller, "reject")}
                             >
+                              <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
-                          </div>
-                        </div>
-                      )}
+                          </>
+                        )}
+                        {seller.status === "approved" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openStatusModal(seller, "reject")}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        )}
+                        {seller.status === "rejected" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openStatusModal(seller, "approve")}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -178,6 +257,48 @@ export default function AdminSellersPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={statusModal.open} onOpenChange={(open) => !open && closeStatusModal()}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {statusModal.type === "approve" ? "Approve Seller" : "Reject Seller"}
+            </DialogTitle>
+            <DialogDescription>
+              {statusModal.type === "approve" 
+                ? `Are you sure you want to approve "${statusModal.sellerName}"?`
+                : `Are you sure you want to reject "${statusModal.sellerName}"? Please provide a reason below.`}
+            </DialogDescription>
+          </DialogHeader>
+          {statusModal.type === "reject" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Rejection Reason</label>
+              <Textarea
+                placeholder="Enter the reason for rejection..."
+                value={modalReason}
+                onChange={(e) => setModalReason(e.target.value)}
+                className="min-h-[100px]"
+                required
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={closeStatusModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={statusModal.type === "reject" ? "destructive" : "default"}
+              onClick={handleStatusChange}
+              disabled={statusModal.type === "reject" && !modalReason.trim()}
+            >
+              {statusModal.type === "approve" ? "Approve" : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

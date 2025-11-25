@@ -33,10 +33,18 @@ export default function LoginPage() {
         });
       }
     } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || "Failed to login";
+      const isApprovalError = 
+        errorMessage.includes("pending approval") ||
+        errorMessage.includes("not approved") ||
+        errorMessage.includes("rejected") ||
+        errorMessage.includes("approval");
+      
       toast({
         title: "Error",
-        description: error.response?.data?.error || error.message || "Failed to login",
+        description: errorMessage,
         variant: "destructive",
+        duration: isApprovalError ? Infinity : undefined, // Keep approval errors visible until user closes
       });
     } finally {
       setLoading(false);

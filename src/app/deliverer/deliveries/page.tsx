@@ -59,12 +59,12 @@ export default function DelivererDeliveriesPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Deliveries</h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="in-transit">In Transit</SelectItem>
             <SelectItem value="delivered">Delivered</SelectItem>

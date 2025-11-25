@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminService, Analytics } from "@/services/adminService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { formatCurrency } from "@/lib/utils";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -67,7 +68,7 @@ export default function AdminAnalyticsPage() {
                 <CardTitle>Total Sales</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">${(analytics?.totalSales || 0).toFixed(2)}</p>
+                <p className="text-3xl font-bold">{formatCurrency(analytics?.totalSales)}</p>
               </CardContent>
             </Card>
           </div>
@@ -133,7 +134,7 @@ export default function AdminAnalyticsPage() {
                         <div>
                           <p className="font-medium">{seller.fullName}</p>
                         </div>
-                        <p className="text-lg font-bold">${seller.sales.toFixed(2)}</p>
+                        <p className="text-lg font-bold">{formatCurrency(seller.sales)}</p>
                       </div>
                     ))}
                 </div>
@@ -145,4 +146,5 @@ export default function AdminAnalyticsPage() {
     </div>
   );
 }
+
 

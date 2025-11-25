@@ -7,13 +7,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Edit, CheckCircle, XCircle } from "lucide-react";
 
 export default function AdminDeliverersPage() {
   const [deliverers, setDeliverers] = useState<Deliverer[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [rejectReason, setRejectReason] = useState<{ [key: string]: string }>({});
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    type: "approve" | "reject" | null;
+    delivererId: string | null;
+    delivererName: string;
+    currentReason?: string;
+  }>({
+    open: false,
+    type: null,
+    delivererId: null,
+    delivererName: "",
+    currentReason: "",
+  });
+  const [modalReason, setModalReason] = useState<string>("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -28,7 +50,27 @@ export default function AdminDeliverersPage() {
         sort: "-createdAt",
       });
       if (response.success) {
-        setDeliverers(response.data || []);
+        // API returns deliverers with userId populated, so email is at deliverer.userId.email
+        const deliverersData = (response.data || []).map((deliverer: any) => ({
+          _id: deliverer._id,
+          userId: deliverer.userId,
+          fullName: deliverer.fullName,
+          licenseNumber: deliverer.licenseNumber,
+          NIC: deliverer.NIC,
+          status: deliverer.status,
+          reason: deliverer.reason,
+          verifiedAt: deliverer.verifiedAt,
+          createdAt: deliverer.createdAt,
+          updatedAt: deliverer.updatedAt,
+          // Extract user email from populated userId
+          user: deliverer.userId ? {
+            email: deliverer.userId.email,
+            _id: deliverer.userId._id,
+            role: deliverer.userId.role,
+            isActive: deliverer.userId.isActive,
+          } : null,
+        }));
+        setDeliverers(deliverersData);
       }
     } catch (error) {
       console.error("Failed to load deliverers", error);
@@ -37,28 +79,32 @@ export default function AdminDeliverersPage() {
     }
   };
 
-  const handleApprove = async (id: string) => {
-    try {
-      const response = await adminService.approveDeliverer(id);
-      if (response.success) {
-        toast({
-          title: "Success",
-          description: "Deliverer approved successfully",
-        });
-        loadDeliverers();
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to approve deliverer",
-        variant: "destructive",
-      });
-    }
+  const openStatusModal = (deliverer: Deliverer, type: "approve" | "reject") => {
+    setStatusModal({
+      open: true,
+      type,
+      delivererId: deliverer._id,
+      delivererName: deliverer.fullName,
+      currentReason: deliverer.reason || "",
+    });
+    setModalReason(deliverer.reason || "");
   };
 
-  const handleReject = async (id: string) => {
-    const reason = rejectReason[id];
-    if (!reason) {
+  const closeStatusModal = () => {
+    setStatusModal({
+      open: false,
+      type: null,
+      delivererId: null,
+      delivererName: "",
+      currentReason: "",
+    });
+    setModalReason("");
+  };
+
+  const handleStatusChange = async () => {
+    if (!statusModal.delivererId || !statusModal.type) return;
+
+    if (statusModal.type === "reject" && !modalReason.trim()) {
       toast({
         title: "Error",
         description: "Please provide a reason for rejection",
@@ -68,19 +114,25 @@ export default function AdminDeliverersPage() {
     }
 
     try {
-      const response = await adminService.rejectDeliverer(id, reason);
+      let response;
+      if (statusModal.type === "approve") {
+        response = await adminService.approveDeliverer(statusModal.delivererId);
+      } else {
+        response = await adminService.rejectDeliverer(statusModal.delivererId, modalReason);
+      }
+
       if (response.success) {
         toast({
           title: "Success",
-          description: "Deliverer rejected successfully",
+          description: `Deliverer ${statusModal.type === "approve" ? "approved" : "rejected"} successfully`,
         });
-        setRejectReason({ ...rejectReason, [id]: "" });
+        closeStatusModal();
         loadDeliverers();
       }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to reject deliverer",
+        description: error.response?.data?.error || `Failed to ${statusModal.type} deliverer`,
         variant: "destructive",
       });
     }
@@ -90,12 +142,12 @@ export default function AdminDeliverersPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Deliverers</h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
@@ -126,10 +178,10 @@ export default function AdminDeliverersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {deliverers.map((deliverer) => (
-                  <TableRow key={deliverer._id}>
+                {deliverers.map((deliverer, index) => (
+                  <TableRow key={deliverer._id || `deliverer-${index}`}>
                     <TableCell className="font-medium">{deliverer.fullName}</TableCell>
-                    <TableCell>{deliverer.user?.email || "N/A"}</TableCell>
+                    <TableCell>{deliverer.userId?.email || deliverer.user?.email || "N/A"}</TableCell>
                     <TableCell>{deliverer.licenseNumber}</TableCell>
                     <TableCell>{deliverer.NIC}</TableCell>
                     <TableCell>
@@ -145,35 +197,64 @@ export default function AdminDeliverersPage() {
                         {deliverer.status}
                       </span>
                     </TableCell>
-                    <TableCell>{deliverer.reason || "-"}</TableCell>
                     <TableCell>
-                      {deliverer.status === "pending" && (
-                        <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
+                        <span>{deliverer.reason || "-"}</span>
+                        {deliverer.reason && (
                           <Button
                             size="sm"
-                            onClick={() => handleApprove(deliverer._id)}
+                            variant="ghost"
+                            className="h-6 w-6 p-0"
+                            onClick={() => openStatusModal(deliverer, "reject")}
+                            title="Edit reason"
                           >
-                            Approve
+                            <Edit className="h-3 w-3" />
                           </Button>
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Rejection reason"
-                              value={rejectReason[deliverer._id] || ""}
-                              onChange={(e) =>
-                                setRejectReason({ ...rejectReason, [deliverer._id]: e.target.value })
-                              }
-                              className="w-40"
-                            />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {deliverer.status === "pending" && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => openStatusModal(deliverer, "approve")}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Approve
+                            </Button>
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => handleReject(deliverer._id)}
+                              onClick={() => openStatusModal(deliverer, "reject")}
                             >
+                              <XCircle className="h-4 w-4 mr-1" />
                               Reject
                             </Button>
-                          </div>
-                        </div>
-                      )}
+                          </>
+                        )}
+                        {deliverer.status === "approved" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openStatusModal(deliverer, "reject")}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        )}
+                        {deliverer.status === "rejected" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openStatusModal(deliverer, "approve")}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -182,6 +263,48 @@ export default function AdminDeliverersPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={statusModal.open} onOpenChange={(open) => !open && closeStatusModal()}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {statusModal.type === "approve" ? "Approve Deliverer" : "Reject Deliverer"}
+            </DialogTitle>
+            <DialogDescription>
+              {statusModal.type === "approve" 
+                ? `Are you sure you want to approve "${statusModal.delivererName}"?`
+                : `Are you sure you want to reject "${statusModal.delivererName}"? Please provide a reason below.`}
+            </DialogDescription>
+          </DialogHeader>
+          {statusModal.type === "reject" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Rejection Reason</label>
+              <Textarea
+                placeholder="Enter the reason for rejection..."
+                value={modalReason}
+                onChange={(e) => setModalReason(e.target.value)}
+                className="min-h-[100px]"
+                required
+              />
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={closeStatusModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={statusModal.type === "reject" ? "destructive" : "default"}
+              onClick={handleStatusChange}
+              disabled={statusModal.type === "reject" && !modalReason.trim()}
+            >
+              {statusModal.type === "approve" ? "Approve" : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

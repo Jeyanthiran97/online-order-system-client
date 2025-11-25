@@ -23,7 +23,24 @@ export default function AdminUsersPage() {
         sort: "-createdAt",
       });
       if (response.success) {
-        setUsers(response.data || []);
+        // API returns data in format: [{ user: {...}, profile: {...} }]
+        // Extract the user objects and map id to _id for consistency
+        const rawData = response.data || [];
+        
+        const usersData = rawData.map((item: any) => {
+          // Handle nested user structure from API
+          const userObj = item.user || item;
+          return {
+            _id: userObj.id || userObj._id,
+            email: userObj.email || "",
+            role: userObj.role || "customer",
+            isActive: userObj.isActive !== undefined ? userObj.isActive : true,
+            createdAt: userObj.createdAt || new Date().toISOString(),
+            updatedAt: userObj.updatedAt || new Date().toISOString(),
+          };
+        });
+        
+        setUsers(usersData);
       }
     } catch (error) {
       console.error("Failed to load users", error);
@@ -36,12 +53,12 @@ export default function AdminUsersPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Users</h1>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
+        <Select value={roleFilter || "all"} onValueChange={(value) => setRoleFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="customer">Customer</SelectItem>
             <SelectItem value="seller">Seller</SelectItem>
             <SelectItem value="deliverer">Deliverer</SelectItem>
@@ -70,8 +87,8 @@ export default function AdminUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user._id}>
+                {users.map((user, index) => (
+                  <TableRow key={user._id || `user-${index}`}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">

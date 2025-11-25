@@ -5,11 +5,17 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "https://online-order-system-api.vercel.app/api";
 
+// Log API URL in development (only in browser)
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  console.log("API URL:", API_URL);
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor to add token
@@ -30,6 +36,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log network errors for debugging
+    if (error.code === "ERR_NETWORK" || error.message === "Network Error") {
+      console.error("Network Error:", {
+        message: error.message,
+        code: error.code,
+        baseURL: API_URL,
+        url: error.config?.url,
+      });
+    }
+
     if (error.response?.status === 401) {
       // Auto logout on 401
       Cookies.remove("token");

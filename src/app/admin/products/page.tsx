@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { productService, Product } from "@/services/productService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -36,12 +37,12 @@ export default function AdminProductsPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Products</h1>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+        <Select value={categoryFilter || "all"} onValueChange={(value) => setCategoryFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="electronics">Electronics</SelectItem>
             <SelectItem value="clothing">Clothing</SelectItem>
             <SelectItem value="food">Food</SelectItem>
@@ -73,11 +74,11 @@ export default function AdminProductsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product._id}>
+                {products.map((product, index) => (
+                  <TableRow key={product._id || `product-${index}`}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>{product.seller?.shopName || "N/A"}</TableCell>
                     <TableCell>

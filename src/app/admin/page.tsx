@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminService, Analytics } from "@/services/adminService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -72,7 +73,7 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">${(analytics?.totalSales || 0).toFixed(2)}</p>
+            <p className="text-3xl font-bold">{formatCurrency(analytics?.totalSales)}</p>
           </CardContent>
         </Card>
         <Card>

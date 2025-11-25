@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Package, ShoppingCart, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
@@ -111,7 +112,7 @@ export default function CustomerDashboard() {
                   <div>
                     <p className="font-medium">Order #{order._id.slice(-8)}</p>
                     <p className="text-sm text-muted-foreground">
-                      ${order.totalAmount.toFixed(2)} • {order.items.length} items
+                      {formatCurrency(order.totalAmount)} • {order.items?.length || 0} items
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

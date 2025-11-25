@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/utils";
 
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -231,7 +232,7 @@ export default function SellerProductsPage() {
                   <TableRow key={product._id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -261,4 +262,5 @@ export default function SellerProductsPage() {
     </div>
   );
 }
+
 

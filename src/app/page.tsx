@@ -33,8 +33,12 @@ export default function HomePage() {
       if (response.success) {
         setProducts(response.data || []);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load products", error);
+      // If it's a network error, show a helpful message
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        console.error("Network error - check if API is accessible and CORS is configured");
+      }
     } finally {
       setLoading(false);
     }
@@ -60,14 +64,14 @@ export default function HomePage() {
             />
           </div>
           <Select
-            value={filters.category}
-            onValueChange={(value) => setFilters({ ...filters, category: value })}
+            value={filters.category || "all"}
+            onValueChange={(value) => setFilters({ ...filters, category: value === "all" ? "" : value })}
           >
             <SelectTrigger className="w-full md:w-[200px]">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="electronics">Electronics</SelectItem>
               <SelectItem value="clothing">Clothing</SelectItem>
               <SelectItem value="food">Food</SelectItem>

@@ -7,6 +7,7 @@ import { productService, Product } from "@/services/productService";
 import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
 
 export default function SellerDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -92,7 +93,7 @@ export default function SellerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">${stats.totalSales.toFixed(2)}</p>
+            <p className="text-3xl font-bold">{formatCurrency(stats.totalSales)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -129,7 +130,7 @@ export default function SellerDashboard() {
                   <div key={product._id} className="flex items-center justify-between p-2 border rounded">
                     <div>
                       <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(product.price)}</p>
                     </div>
                     <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
                   </div>
@@ -159,7 +160,7 @@ export default function SellerDashboard() {
                   <div key={order._id} className="flex items-center justify-between p-2 border rounded">
                     <div>
                       <p className="font-medium">Order #{order._id.slice(-8)}</p>
-                      <p className="text-sm text-muted-foreground">${order.totalAmount.toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(order.totalAmount)}</p>
                     </div>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${

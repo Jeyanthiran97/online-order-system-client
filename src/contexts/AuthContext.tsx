@@ -47,9 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await api.get('/auth/me');
-      const userData = response.data.data.user;
-      setUser(userData);
-      Cookies.set('user', JSON.stringify(userData), { expires: 7 });
+      const userDataFromApi = response.data.data.user;
+      const profileData = response.data.data.profile; // Profile is a separate object
+      
+      // Merge user and profile data
+      const fullUserData = {
+        ...userDataFromApi,
+        _id: userDataFromApi.id || userDataFromApi._id,
+        profile: profileData, // Add profile to user object
+      };
+      
+      setUser(fullUserData);
+      Cookies.set('user', JSON.stringify(fullUserData), { expires: 7 });
     } catch (error) {
       console.error('Failed to fetch user', error);
       Cookies.remove('token');
@@ -89,13 +98,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Fetch full user profile to check approval status
     try {
       const response = await api.get('/auth/me');
-      const fullUserData = response.data.data.user;
+      const userDataFromApi = response.data.data.user;
+      const profileData = response.data.data.profile; // Profile is a separate object, not nested in user
+      
+      // Merge user and profile data
+      const fullUserData = {
+        ...userDataFromApi,
+        _id: userDataFromApi.id || userDataFromApi._id,
+        profile: profileData, // Add profile to user object for consistency
+      };
+      
       setUser(fullUserData);
       Cookies.set('user', JSON.stringify(fullUserData), { expires: 7 });
 
       // Check approval status for sellers and deliverers
       if (fullUserData.role === 'seller' || fullUserData.role === 'deliverer') {
-        const status = fullUserData.profile?.status;
+        // Profile status is at profile.status (not user.profile.status in API response)
+        const status = profileData?.status;
         if (status !== 'approved') {
           // Block login if not approved
           Cookies.remove('token');
@@ -105,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             status === 'pending'
               ? 'Your account is pending approval. Please wait for admin approval.'
               : status === 'rejected'
-              ? `Your account has been rejected. ${fullUserData.profile?.reason || ''}`
+              ? `Your account has been rejected. ${profileData?.reason || ''}`
               : 'Your account is not approved yet.'
           );
         }

@@ -12,6 +12,7 @@ import { Star, Package } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { orderService } from "@/services/orderService";
 import { useToast } from "@/components/ui/use-toast";
+import { formatCurrency } from "@/lib/utils";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -130,7 +131,7 @@ export default function ProductDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold">${product.price.toFixed(2)}</span>
+                  <span className="text-4xl font-bold">{formatCurrency(product.price)}</span>
                   {product.rating && (
                     <div className="flex items-center gap-1">
                       <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
@@ -175,4 +176,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
 

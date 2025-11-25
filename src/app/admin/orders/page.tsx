@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -68,12 +69,12 @@ export default function AdminOrdersPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Orders</h1>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="shipped">Shipped</SelectItem>
@@ -106,13 +107,13 @@ export default function AdminOrdersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order._id}>
+                {orders.map((order, index) => (
+                  <TableRow key={order._id || `order-${index}`}>
                     <TableCell className="font-mono text-sm">
                       #{order._id.slice(-8)}
                     </TableCell>
-                    <TableCell>{order.items.length} items</TableCell>
-                    <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
+                    <TableCell>{order.items?.length || 0} items</TableCell>
+                    <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
@@ -139,8 +140,8 @@ export default function AdminOrdersPage() {
                             <SelectValue placeholder="Assign" />
                           </SelectTrigger>
                           <SelectContent>
-                            {deliverers.map((deliverer) => (
-                              <SelectItem key={deliverer._id} value={deliverer._id}>
+                            {deliverers.map((deliverer, idx) => (
+                              <SelectItem key={deliverer._id || `deliverer-${idx}`} value={deliverer._id}>
                                 {deliverer.fullName}
                               </SelectItem>
                             ))}

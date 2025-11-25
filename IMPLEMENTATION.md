@@ -332,3 +332,4 @@ NEXT_PUBLIC_API_URL=https://online-order-system-api.vercel.app/api
 - Code follows Next.js 14 App Router best practices
 - UI is built with shadcn/ui and Tailwind CSS
 
+
