@@ -177,7 +177,7 @@ export default function AdminSellersPage() {
                 {sellers.map((seller, index) => (
                   <TableRow key={seller._id || `seller-${index}`}>
                     <TableCell className="font-medium">{seller.shopName}</TableCell>
-                    <TableCell>{seller.userId?.email || seller.user?.email || "N/A"}</TableCell>
+                    <TableCell>{seller.user?.email || "N/A"}</TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
