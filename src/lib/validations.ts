@@ -128,9 +128,7 @@ export const categorySchema = z.object({
   description: z
     .string()
     .optional(),
-  isActive: z
-    .boolean()
-    .default(true),
+  isActive: z.boolean(),
 });
 
 export type CategoryFormData = z.infer<typeof categorySchema>;
