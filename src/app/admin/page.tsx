@@ -7,16 +7,21 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function AdminDashboard() {
+  const { loading: authLoading } = useAuth();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    // Wait for auth to be ready before loading data
+    if (!authLoading) {
+      loadAnalytics();
+    }
+  }, [authLoading]);
 
   const loadAnalytics = async () => {
     try {
@@ -35,6 +40,17 @@ export default function AdminDashboard() {
     name: seller.shopName,
     sales: seller.totalSales,
   })) || [];
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="p-8">
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" text="Loading..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">

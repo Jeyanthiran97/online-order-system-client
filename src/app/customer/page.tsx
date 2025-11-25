@@ -11,7 +11,7 @@ import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function CustomerDashboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -21,8 +21,11 @@ export default function CustomerDashboard() {
   });
 
   useEffect(() => {
-    loadOrders();
-  }, []);
+    // Wait for auth to be ready before loading data
+    if (!authLoading) {
+      loadOrders();
+    }
+  }, [authLoading]);
 
   const loadOrders = async () => {
     try {
@@ -42,6 +45,17 @@ export default function CustomerDashboard() {
       setLoading(false);
     }
   };
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <main className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" text="Loading..." />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="container mx-auto px-4 py-8">

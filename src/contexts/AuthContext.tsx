@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       setUser(fullUserData);
       Cookies.set('user', JSON.stringify(fullUserData), { expires: 7 });
+      setLoading(false); // Ensure loading is set to false after login
 
       // Check approval status for sellers and deliverers
       if (fullUserData.role === 'seller' || fullUserData.role === 'deliverer') {
@@ -120,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           Cookies.remove('token');
           Cookies.remove('user');
           setUser(null);
+          setLoading(false);
           throw new Error(
             status === 'pending'
               ? 'Your account is pending approval. Please wait for admin approval.'
@@ -148,6 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           router.push('/');
       }
     } catch (error: any) {
+      // Ensure loading is false even on error
+      setLoading(false);
       // Re-throw the error so the login page can handle it
       throw error;
     }

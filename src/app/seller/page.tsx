@@ -9,8 +9,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SellerDashboard() {
+  const { loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,8 +24,11 @@ export default function SellerDashboard() {
   });
 
   useEffect(() => {
-    loadData();
-  }, []);
+    // Wait for auth to be ready before loading data
+    if (!authLoading) {
+      loadData();
+    }
+  }, [authLoading]);
 
   const loadData = async () => {
     try {
@@ -57,6 +62,17 @@ export default function SellerDashboard() {
       setLoading(false);
     }
   };
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="p-8">
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" text="Loading..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">

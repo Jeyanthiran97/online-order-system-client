@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { deliveryService, Delivery } from "@/services/deliveryService";
 import { Truck, Package, CheckCircle, Clock } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DelivererDashboard() {
+  const { loading: authLoading } = useAuth();
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -17,8 +19,11 @@ export default function DelivererDashboard() {
   });
 
   useEffect(() => {
-    loadDeliveries();
-  }, []);
+    // Wait for auth to be ready before loading data
+    if (!authLoading) {
+      loadDeliveries();
+    }
+  }, [authLoading]);
 
   const loadDeliveries = async () => {
     setLoading(true);
@@ -40,6 +45,17 @@ export default function DelivererDashboard() {
       setLoading(false);
     }
   };
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="p-8">
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" text="Loading..." />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">

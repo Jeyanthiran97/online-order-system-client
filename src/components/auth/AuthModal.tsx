@@ -89,14 +89,14 @@ export function AuthModal({
     try {
       const response = await authService.login(data);
       if (response.success) {
+        resetLogin();
+        onOpenChange(false);
+        // The login function in AuthContext handles navigation
         await login(response.data.token, response.data.user);
         toast({
           title: "Success",
           description: "Logged in successfully",
         });
-        resetLogin();
-        onOpenChange(false);
-        router.refresh();
       }
     } catch (error: unknown) {
       mapServerErrorsToFields(error, setErrorLogin, {
