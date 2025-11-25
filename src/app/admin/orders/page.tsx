@@ -48,7 +48,7 @@ export default function AdminOrdersPage() {
 
   const handleAssignDeliverer = async (orderId: string, delivererId: string) => {
     try {
-      const response = await orderService.updateOrder(orderId, { delivererId });
+      const response = await orderService.updateOrder(orderId, { assignedDelivererId: delivererId });
       if (response.success) {
         toast({
           title: "Success",
@@ -60,6 +60,25 @@ export default function AdminOrdersPage() {
       toast({
         title: "Error",
         description: error.response?.data?.error || "Failed to assign deliverer",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const response = await orderService.updateOrder(orderId, { status: newStatus });
+      if (response.success) {
+        toast({
+          title: "Success",
+          description: `Order status updated to ${newStatus}`,
+        });
+        loadData();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to update order status",
         variant: "destructive",
       });
     }
@@ -153,14 +172,43 @@ export default function AdminOrdersPage() {
                       {new Date(order.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {order.status === "pending" && (
-                        <Button
-                          size="sm"
-                          onClick={() => orderService.updateOrder(order._id, { status: "confirmed" })}
-                        >
-                          Confirm
-                        </Button>
-                      )}
+                      <div className="flex gap-2">
+                        {order.status === "pending" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleStatusChange(order._id, "confirmed")}
+                          >
+                            Confirm
+                          </Button>
+                        )}
+                        {order.status === "confirmed" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStatusChange(order._id, "shipped")}
+                              disabled={!order.delivererId}
+                            >
+                              Ship
+                            </Button>
+                            {!order.delivererId && (
+                              <span className="text-xs text-muted-foreground self-center">
+                                Assign deliverer first
+                              </span>
+                            )}
+                          </>
+                        )}
+                        {order.status === "shipped" && (
+                          <span className="text-sm text-muted-foreground">
+                            Awaiting delivery
+                          </span>
+                        )}
+                        {(order.status === "delivered" || order.status === "cancelled") && (
+                          <span className="text-sm text-muted-foreground capitalize">
+                            {order.status}
+                          </span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

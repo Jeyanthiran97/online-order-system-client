@@ -51,7 +51,7 @@ export const orderService = {
     return response.data;
   },
 
-  updateOrder: async (id: string, data: { status?: string; delivererId?: string }) => {
+  updateOrder: async (id: string, data: { status?: string; assignedDelivererId?: string }) => {
     const response = await api.patch(`/orders/${id}`, data);
     return response.data;
   },

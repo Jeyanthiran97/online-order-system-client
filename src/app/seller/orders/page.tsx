@@ -128,12 +128,20 @@ export default function SellerOrdersPage() {
                         </Button>
                       )}
                       {order.status === "confirmed" && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleUpdateStatus(order._id, "shipped")}
-                        >
-                          Ship
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateStatus(order._id, "shipped")}
+                            disabled={!order.delivererId}
+                          >
+                            Ship
+                          </Button>
+                          {!order.delivererId && (
+                            <span className="text-xs text-muted-foreground">
+                              Admin must assign deliverer
+                            </span>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
