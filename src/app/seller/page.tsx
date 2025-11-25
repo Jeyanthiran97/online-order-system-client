@@ -8,6 +8,7 @@ import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function SellerDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -123,7 +124,9 @@ export default function SellerDashboard() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="text-center py-8">
+                <LoadingSpinner text="Loading products..." />
+              </div>
             ) : products.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No products yet</div>
             ) : (
@@ -153,7 +156,9 @@ export default function SellerDashboard() {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8">Loading...</div>
+              <div className="text-center py-8">
+                <LoadingSpinner text="Loading orders..." />
+              </div>
             ) : orders.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No orders yet</div>
             ) : (

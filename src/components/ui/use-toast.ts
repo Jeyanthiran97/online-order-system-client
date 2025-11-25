@@ -145,8 +145,10 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
-  // If duration is Infinity, don't set a timeout
-  const toastDuration = props.duration === Infinity ? undefined : (props.duration ?? 5000)
+  // Handle duration: undefined = no auto-dismiss, Infinity = no auto-dismiss, otherwise use provided or default 5000
+  const toastDuration = props.duration === undefined || props.duration === Infinity 
+    ? undefined 
+    : (props.duration ?? 5000)
 
   dispatch({
     type: "ADD_TOAST",

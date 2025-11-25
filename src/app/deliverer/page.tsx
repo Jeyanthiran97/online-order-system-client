@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { deliveryService, Delivery } from "@/services/deliveryService";
 import { Truck, Package, CheckCircle, Clock } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function DelivererDashboard() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -100,7 +101,9 @@ export default function DelivererDashboard() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="text-center py-8">
+              <LoadingSpinner text="Loading deliveries..." />
+            </div>
           ) : deliveries.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">No deliveries assigned</div>
           ) : (

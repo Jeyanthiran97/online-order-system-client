@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function HomePage() {
   const router = useRouter();
@@ -92,7 +93,9 @@ export default function HomePage() {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">Loading...</div>
+          <div className="text-center py-12">
+            <LoadingSpinner size="lg" text="Loading..." />
+          </div>
         </main>
       </div>
     );
@@ -150,7 +153,9 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12">Loading products...</div>
+          <div className="text-center py-12">
+            <LoadingSpinner size="lg" text="Loading products..." />
+          </div>
         ) : products.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">No products found</div>
         ) : (

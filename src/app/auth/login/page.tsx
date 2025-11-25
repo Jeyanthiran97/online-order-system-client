@@ -24,6 +24,7 @@ export default function LoginPage() {
     register,
     handleSubmit,
     setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -31,8 +32,8 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-    // Don't reset form on error
     shouldUnregister: false,
+    shouldFocusError: true,
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -47,44 +48,27 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (error: unknown) {
-      // Try to map server errors to form fields first
-      const hasFieldErrors = mapServerErrorsToFields(error, setError, {
+      // Map server errors to form fields
+      mapServerErrorsToFields(error, setError, {
         email: "email",
         password: "password",
       });
 
-      // Get error message for toast if needed
+      // Get error message for toast
       const errorMessage = getErrorMessage(error);
-      const isApprovalError = 
-        errorMessage.includes("pending approval") ||
-        errorMessage.includes("not approved") ||
-        errorMessage.includes("rejected") ||
-        errorMessage.includes("approval") ||
-        errorMessage.includes("inactive");
-
-      // If we have field errors, still show toast for credential errors (but don't auto-hide)
-      // For other errors (approval errors, etc.), show as toast that doesn't auto-hide
-      if (hasFieldErrors) {
-        // If it's a credential error, show toast that doesn't auto-hide
-        if (errorMessage.includes("Invalid email or password") || 
-            errorMessage.includes("No account found") || 
-            errorMessage.includes("Incorrect password")) {
-          toast({
-            title: "Login Failed",
-            description: errorMessage,
-            variant: "destructive",
-            duration: Infinity, // Don't auto-hide - wait for user to close
-          });
-        }
-        return;
-      }
-
-      // For other errors (approval errors, network errors, etc.), show as toast that doesn't auto-hide
+      
+      // Clear form fields immediately on login error
+      reset({
+        email: "",
+        password: "",
+      });
+      
+      // Show toast for login errors - auto-dismisses after 5 seconds
       toast({
         title: "Login Failed",
         description: errorMessage,
         variant: "destructive",
-        duration: Infinity, // Don't auto-hide - wait for user to close
+        duration: 5000, // Auto-dismiss after 5 seconds
       });
     }
   };
@@ -96,7 +80,14 @@ export default function LoginPage() {
           <CardTitle>Login</CardTitle>
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return handleSubmit(onSubmit)(e);
+          }}
+          noValidate
+        >
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

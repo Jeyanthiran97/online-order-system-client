@@ -6,6 +6,7 @@ import { adminService, Analytics } from "@/services/adminService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -90,7 +91,9 @@ export default function AdminDashboard() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12">Loading analytics...</div>
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" text="Loading analytics..." />
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>

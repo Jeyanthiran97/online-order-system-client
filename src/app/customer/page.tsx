@@ -8,6 +8,7 @@ import { Package, ShoppingCart, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
@@ -99,7 +100,9 @@ export default function CustomerDashboard() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading...</div>
+            <div className="text-center py-8">
+              <LoadingSpinner text="Loading orders..." />
+            </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">No orders yet</div>
           ) : (

@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { orderService } from "@/services/orderService";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/utils";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -119,7 +120,9 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+        <div className="container mx-auto px-4 py-12 text-center">
+          <LoadingSpinner size="lg" text="Loading..." />
+        </div>
       </div>
     );
   }
@@ -128,7 +131,9 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto px-4 py-12 text-center">Loading...</div>
+        <div className="container mx-auto px-4 py-12 text-center">
+          <LoadingSpinner size="lg" text="Loading product..." />
+        </div>
       </div>
     );
   }
