@@ -1,16 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, LogOut } from "lucide-react";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
 
   const handleLogout = () => {
     logout();
     window.location.href = "/";
+  };
+
+  const handleOpenLogin = () => {
+    setAuthModalMode("login");
+    setAuthModalOpen(true);
+  };
+
+  const handleOpenSignup = () => {
+    setAuthModalMode("signup");
+    setAuthModalOpen(true);
   };
 
   return (
@@ -30,12 +44,10 @@ export function Navbar() {
                 <Link href="/deliverer/register">
                   <Button variant="ghost">Join as Deliverer</Button>
                 </Link>
-                <Link href="/auth/signup">
-                  <Button variant="outline">Signup</Button>
-                </Link>
-                <Link href="/auth/login">
-                  <Button>Signin</Button>
-                </Link>
+                <Button variant="outline" onClick={handleOpenSignup}>
+                  Signup
+                </Button>
+                <Button onClick={handleOpenLogin}>Signin</Button>
               </>
             ) : (
               <>
@@ -68,6 +80,11 @@ export function Navbar() {
           </div>
         </div>
       </div>
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        initialMode={authModalMode}
+      />
     </nav>
   );
 }
