@@ -8,7 +8,9 @@ export interface Product {
   category: string;
   stock: number;
   rating?: number;
-  sellerId: string;
+  sellerId: string | {
+    shopName: string;
+  };
   seller?: {
     shopName: string;
   };

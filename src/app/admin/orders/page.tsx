@@ -164,11 +164,16 @@ export default function AdminOrdersPage() {
                                 const id = deliverer._id;
                                 return id && String(id).trim() !== "";
                               })
-                              .map((deliverer, idx) => (
-                                <SelectItem key={deliverer._id || `deliverer-${idx}`} value={String(deliverer._id)}>
-                                  {deliverer.fullName}
-                                </SelectItem>
-                              ))}
+                              .map((deliverer, idx) => {
+                                const delivererValue = String(deliverer._id).trim();
+                                if (!delivererValue || delivererValue === "") return null;
+                                return (
+                                  <SelectItem key={deliverer._id || `deliverer-${idx}`} value={delivererValue}>
+                                    {deliverer.fullName}
+                                  </SelectItem>
+                                );
+                              })
+                              .filter(Boolean)}
                           </SelectContent>
                         </Select>
                       )}

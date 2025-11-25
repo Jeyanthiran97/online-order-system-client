@@ -41,8 +41,8 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
         </div>
-        {product.seller && (
-          <p className="text-sm text-muted-foreground mt-2">by {product.seller.shopName}</p>
+        {typeof product.sellerId === 'object' && product.sellerId?.shopName && (
+          <p className="text-sm text-muted-foreground mt-2">by {product.sellerId.shopName}</p>
         )}
       </CardContent>
       <CardFooter>

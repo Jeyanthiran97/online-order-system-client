@@ -167,8 +167,8 @@ export default function HomePage() {
                 {categories
                   .filter((category) => category.name && category.name.trim() !== "")
                   .map((category) => {
-                    const categoryValue = category.name?.trim() || "";
-                    if (!categoryValue) return null;
+                    const categoryValue = (category.name?.trim() || category._id || `category-${category._id}`).trim();
+                    if (!categoryValue || categoryValue === "") return null;
                     return (
                       <SelectItem key={category._id} value={categoryValue}>
                         {categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1)}

@@ -176,8 +176,8 @@ export default function ProductDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Category: {product.category}</p>
                   <p className="text-sm text-muted-foreground">Stock: {product.stock} available</p>
-                  {product.seller && (
-                    <p className="text-sm text-muted-foreground">Seller: {product.seller.shopName}</p>
+                  {typeof product.sellerId === 'object' && product.sellerId?.shopName && (
+                    <p className="text-sm text-muted-foreground">Seller: {product.sellerId.shopName}</p>
                   )}
                 </div>
                 {isAuthenticated && user?.role === "customer" && (

@@ -80,8 +80,8 @@ export default function AdminProductsPage() {
               {categories
                 .filter((category) => category.name && category.name.trim() !== "")
                 .map((category) => {
-                  const categoryValue = category.name?.trim() || "";
-                  if (!categoryValue) return null;
+                  const categoryValue = (category.name?.trim() || category._id || `category-${category._id}`).trim();
+                  if (!categoryValue || categoryValue === "") return null;
                   return (
                     <SelectItem key={category._id} value={categoryValue}>
                       {categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1)}
@@ -102,11 +102,16 @@ export default function AdminProductsPage() {
                   const id = seller._id;
                   return id && String(id).trim() !== "";
                 })
-                .map((seller) => (
-                  <SelectItem key={seller._id} value={String(seller._id)}>
-                    {seller.shopName}
-                  </SelectItem>
-                ))}
+                .map((seller) => {
+                  const sellerValue = String(seller._id).trim();
+                  if (!sellerValue || sellerValue === "") return null;
+                  return (
+                    <SelectItem key={seller._id} value={sellerValue}>
+                      {seller.shopName}
+                    </SelectItem>
+                  );
+                })
+                .filter(Boolean)}
             </SelectContent>
           </Select>
         </div>
@@ -140,7 +145,11 @@ export default function AdminProductsPage() {
                     <TableCell className="capitalize">{product.category}</TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
-                    <TableCell>{product.seller?.shopName || "N/A"}</TableCell>
+                    <TableCell>
+                      {typeof product.sellerId === 'object' && product.sellerId?.shopName
+                        ? product.sellerId.shopName
+                        : "N/A"}
+                    </TableCell>
                     <TableCell>
                       {new Date(product.createdAt).toLocaleDateString()}
                     </TableCell>
