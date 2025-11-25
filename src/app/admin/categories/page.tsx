@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { categoryService, Category } from "@/services/categoryService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -18,18 +21,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { categorySchema, type CategoryFormData } from "@/lib/validations";
+import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    isActive: true,
-  });
   const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      isActive: true,
+    },
+  });
 
   useEffect(() => {
     loadCategories();
@@ -56,7 +71,7 @@ export default function AdminCategoriesPage() {
 
   const openCreateModal = () => {
     setEditingCategory(null);
-    setFormData({
+    reset({
       name: "",
       description: "",
       isActive: true,
@@ -66,7 +81,7 @@ export default function AdminCategoriesPage() {
 
   const openEditModal = (category: Category) => {
     setEditingCategory(category);
-    setFormData({
+    reset({
       name: category.name,
       description: category.description || "",
       isActive: category.isActive,
@@ -77,24 +92,23 @@ export default function AdminCategoriesPage() {
   const closeModal = () => {
     setShowModal(false);
     setEditingCategory(null);
-    setFormData({
+    reset({
       name: "",
       description: "",
       isActive: true,
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: CategoryFormData) => {
     try {
       if (editingCategory) {
-        await categoryService.updateCategory(editingCategory._id, formData);
+        await categoryService.updateCategory(editingCategory._id, data);
         toast({
           title: "Success",
           description: "Category updated successfully",
         });
       } else {
-        await categoryService.createCategory(formData);
+        await categoryService.createCategory(data);
         toast({
           title: "Success",
           description: "Category created successfully",
@@ -102,12 +116,21 @@ export default function AdminCategoriesPage() {
       }
       closeModal();
       loadCategories();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to save category",
-        variant: "destructive",
+    } catch (error: unknown) {
+      // Try to map server errors to form fields
+      const hasFieldErrors = mapServerErrorsToFields(error, setError, {
+        name: "name",
+        description: "description",
       });
+
+      // If it's a common error or couldn't map to fields, show as toast
+      if (isCommonError(error) || !hasFieldErrors) {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -121,10 +144,10 @@ export default function AdminCategoriesPage() {
         description: "Category deleted successfully",
       });
       loadCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete category",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
@@ -213,17 +236,17 @@ export default function AdminCategoriesPage() {
                 : "Fill in the details to create a new category."}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Category Name *</Label>
               <Input
                 id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                {...register("name")}
                 placeholder="e.g., Electronics"
-                required
                 disabled={!!editingCategory}
+                className={errors.name ? "border-red-500" : ""}
               />
+              <FormError>{errors.name?.message}</FormError>
               {editingCategory && (
                 <p className="text-xs text-muted-foreground">
                   Category name cannot be changed after creation
@@ -234,18 +257,18 @@ export default function AdminCategoriesPage() {
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                {...register("description")}
                 placeholder="Enter category description..."
                 rows={3}
+                className={errors.description ? "border-red-500" : ""}
               />
+              <FormError>{errors.description?.message}</FormError>
             </div>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                {...register("isActive")}
                 className="h-4 w-4"
               />
               <Label htmlFor="isActive">Active</Label>
@@ -254,8 +277,8 @@ export default function AdminCategoriesPage() {
               <Button type="button" variant="outline" onClick={closeModal}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {editingCategory ? "Update" : "Create"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (editingCategory ? "Updating..." : "Creating...") : (editingCategory ? "Update" : "Create")}
               </Button>
             </DialogFooter>
           </form>
@@ -264,4 +287,3 @@ export default function AdminCategoriesPage() {
     </div>
   );
 }
-

@@ -1,48 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/authService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
+import { customerRegisterSchema, type CustomerRegisterFormData } from "@/lib/validations";
+import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    fullName: "",
-    phone: "",
-    address: "",
-  });
-  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CustomerRegisterFormData>({
+    resolver: zodResolver(customerRegisterSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      fullName: "",
+      phone: "",
+      address: "",
+    },
+  });
 
+  const onSubmit = async (data: CustomerRegisterFormData) => {
     try {
-      const response = await authService.registerCustomer(formData);
+      const response = await authService.registerCustomer(data);
       if (response.success) {
         await login(response.data.token, response.data.user);
         toast({
           title: "Success",
           description: "Account created successfully",
         });
+        router.push("/");
       }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || error.message || "Failed to create account",
-        variant: "destructive",
+    } catch (error: unknown) {
+      // Try to map server errors to form fields
+      const hasFieldErrors = mapServerErrorsToFields(error, setError, {
+        email: "email",
+        password: "password",
+        fullName: "fullName",
+        phone: "phone",
+        address: "address",
       });
-    } finally {
-      setLoading(false);
+
+      // If it's a common error or couldn't map to fields, show as toast
+      if (isCommonError(error) || !hasFieldErrors) {
+        toast({
+          title: "Registration Failed",
+          description: getErrorMessage(error),
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -53,61 +75,63 @@ export default function SignupPage() {
           <CardTitle>Create Account</CardTitle>
           <CardDescription>Sign up as a customer</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                required
+                {...register("fullName")}
+                className={errors.fullName ? "border-red-500" : ""}
               />
+              <FormError>{errors.fullName?.message}</FormError>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
+                placeholder="you@example.com"
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
               />
+              <FormError>{errors.email?.message}</FormError>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                required
+                placeholder="+1234567890"
+                {...register("phone")}
+                className={errors.phone ? "border-red-500" : ""}
               />
+              <FormError>{errors.phone?.message}</FormError>
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
               <Input
                 id="address"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
+                placeholder="123 Main St, City, Country"
+                {...register("address")}
+                className={errors.address ? "border-red-500" : ""}
               />
+              <FormError>{errors.address?.message}</FormError>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                minLength={6}
+                {...register("password")}
+                className={errors.password ? "border-red-500" : ""}
               />
+              <FormError>{errors.password?.message}</FormError>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Sign Up"}
             </Button>
             <div className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}

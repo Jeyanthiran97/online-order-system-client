@@ -16,8 +16,10 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, duration, ...props }) {
+        // Handle Infinity duration - Radix UI Toast uses undefined for no auto-dismiss
+        const toastDuration = duration === Infinity ? undefined : duration;
         return (
-          <Toast key={id} duration={duration} {...props}>
+          <Toast key={id} duration={toastDuration} {...props}>
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (

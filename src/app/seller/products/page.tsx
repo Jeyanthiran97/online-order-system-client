@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { productService, Product } from "@/services/productService";
 import { categoryService, Category } from "@/services/categoryService";
@@ -9,10 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
+import { productFormSchema, type ProductFormData } from "@/lib/validations";
+import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
 
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,14 +25,25 @@ export default function SellerProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: "",
-  });
   const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductFormData>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      stock: "",
+      category: "",
+    },
+  });
 
   useEffect(() => {
     loadCategories();
@@ -59,15 +75,8 @@ export default function SellerProductsPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ProductFormData) => {
     try {
-      const data = {
-        ...formData,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
-      };
-
       if (editingProduct) {
         await productService.updateProduct(editingProduct._id, data);
         toast({
@@ -84,31 +93,37 @@ export default function SellerProductsPage() {
 
       setShowForm(false);
       setEditingProduct(null);
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        category: "",
-        stock: "",
-      });
+      reset();
       loadProducts();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to save product",
-        variant: "destructive",
+    } catch (error: unknown) {
+      // Try to map server errors to form fields
+      const hasFieldErrors = mapServerErrorsToFields(error, setError, {
+        name: "name",
+        description: "description",
+        price: "price",
+        stock: "stock",
+        category: "category",
       });
+
+      // If it's a common error or couldn't map to fields, show as toast
+      if (isCommonError(error) || !hasFieldErrors) {
+        toast({
+          title: "Error",
+          description: getErrorMessage(error),
+          variant: "destructive",
+        });
+      }
     }
   };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setFormData({
+    reset({
       name: product.name,
-      description: product.description,
+      description: product.description || "",
       price: product.price.toString(),
-      category: product.category,
       stock: product.stock.toString(),
+      category: product.category,
     });
     setShowForm(true);
   };
@@ -123,13 +138,19 @@ export default function SellerProductsPage() {
         description: "Product deleted successfully",
       });
       loadProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.response?.data?.error || "Failed to delete product",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingProduct(null);
+    reset();
   };
 
   return (
@@ -148,45 +169,53 @@ export default function SellerProductsPage() {
             <CardTitle>{editingProduct ? "Edit Product" : "Add New Product"}</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Product Name</Label>
                   <Input
                     id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
+                    {...register("name")}
+                    className={errors.name ? "border-red-500" : ""}
                   />
+                  <FormError>{errors.name?.message}</FormError>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    required
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category._id} value={category.name}>
-                          {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    name="category"
+                    control={control}
+                    render={({ field }) => (
+                      <>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category._id} value={category.name}>
+                                {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormError>{errors.category?.message}</FormError>
+                      </>
+                    )}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Input
                   id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  required
+                  {...register("description")}
+                  className={errors.description ? "border-red-500" : ""}
                 />
+                <FormError>{errors.description?.message}</FormError>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -195,35 +224,27 @@ export default function SellerProductsPage() {
                     id="price"
                     type="number"
                     step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
+                    {...register("price")}
+                    className={errors.price ? "border-red-500" : ""}
                   />
+                  <FormError>{errors.price?.message}</FormError>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="stock">Stock</Label>
                   <Input
                     id="stock"
                     type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
+                    {...register("stock")}
+                    className={errors.stock ? "border-red-500" : ""}
                   />
+                  <FormError>{errors.stock?.message}</FormError>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button type="submit">{editingProduct ? "Update" : "Create"}</Button>
-                <Button type="button" variant="outline" onClick={() => {
-                  setShowForm(false);
-                  setEditingProduct(null);
-                  setFormData({
-                    name: "",
-                    description: "",
-                    price: "",
-                    category: "",
-                    stock: "",
-                  });
-                }}>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (editingProduct ? "Updating..." : "Creating...") : (editingProduct ? "Update" : "Create")}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
               </div>
@@ -287,5 +308,3 @@ export default function SellerProductsPage() {
     </div>
   );
 }
-
-
