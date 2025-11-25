@@ -164,11 +164,13 @@ export default function HomePage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category._id} value={category.name}>
-                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                  </SelectItem>
-                ))}
+                {categories
+                  .filter((category) => category.name && category.name.trim() !== "")
+                  .map((category) => (
+                    <SelectItem key={category._id} value={category.name}>
+                      {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Select
