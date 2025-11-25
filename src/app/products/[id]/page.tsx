@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Star, Package } from "lucide-react";
+import { Star, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { orderService } from "@/services/orderService";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,6 +24,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [ordering, setOrdering] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     // Redirect sellers, deliverers, and admins away from public routes
@@ -55,6 +56,10 @@ export default function ProductDetailPage() {
       const response = await productService.getProduct(params.id as string);
       if (response.success) {
         setProduct(response.data);
+        // Set initial image index to main image
+        if (response.data.mainImageIndex !== undefined) {
+          setSelectedImageIndex(response.data.mainImageIndex);
+        }
       }
     } catch (error) {
       console.error("Failed to load product", error);
@@ -62,6 +67,20 @@ export default function ProductDetailPage() {
       setLoading(false);
     }
   };
+
+  const getImageUrl = (imagePath: string) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
+    return `${API_URL.replace('/api', '')}${imagePath}`;
+  };
+
+  const getProductImages = () => {
+    if (!product?.images || product.images.length === 0) return [];
+    return product.images.map(img => getImageUrl(img)).filter(Boolean) as string[];
+  };
+
+  const images = getProductImages();
 
   const handleOrder = async () => {
     if (!isAuthenticated || user?.role !== "customer") {
@@ -153,9 +172,63 @@ export default function ProductDetailPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
-            <div className="aspect-square w-full bg-muted rounded-lg flex items-center justify-center mb-4">
-              <Package className="h-24 w-24 text-muted-foreground" />
+            {/* Main Image */}
+            <div className="aspect-square w-full bg-muted rounded-lg overflow-hidden mb-4 relative group">
+              {images.length > 0 ? (
+                <>
+                  <img
+                    src={images[selectedImageIndex]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setSelectedImageIndex((prev) => (prev + 1) % images.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Next image"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Package className="h-24 w-24 text-muted-foreground" />
+                </div>
+              )}
             </div>
+            
+            {/* Thumbnail Gallery */}
+            {images.length > 1 && (
+              <div className="grid grid-cols-5 gap-2">
+                {images.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index
+                        ? 'border-primary scale-105'
+                        : 'border-transparent hover:border-primary/50'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} - Image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <Card>

@@ -13,11 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, X, Image as ImageIcon, Star } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { productFormSchema, type ProductFormData } from "@/lib/validations";
 import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
+
+interface ImagePreview {
+  file?: File;
+  url: string;
+  originalPath?: string; // Store original path for existing images
+  isExisting?: boolean;
+}
 
 export default function SellerProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,6 +32,8 @@ export default function SellerProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
   const { toast } = useToast();
 
   const {
@@ -75,8 +84,63 @@ export default function SellerProductsPage() {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newPreviews: ImagePreview[] = files.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+
+    const totalImages = imagePreviews.length + newPreviews.length;
+    if (totalImages > 5) {
+      toast({
+        title: "Error",
+        description: "Maximum 5 images allowed. Please remove some images first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setImagePreviews([...imagePreviews, ...newPreviews]);
+    e.target.value = ""; // Reset input
+  };
+
+  const removeImage = (index: number) => {
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImagePreviews(newPreviews);
+    // Adjust main image index if needed
+    if (mainImageIndex >= newPreviews.length && newPreviews.length > 0) {
+      setMainImageIndex(newPreviews.length - 1);
+    } else if (newPreviews.length === 0) {
+      setMainImageIndex(0);
+    }
+  };
+
+  const setMainImage = (index: number) => {
+    setMainImageIndex(index);
+  };
+
   const onSubmit = async (data: ProductFormData) => {
     try {
+      // Get new image files
+      const newImageFiles = imagePreviews
+        .filter(preview => preview.file)
+        .map(preview => preview.file!);
+
+      // Get existing image paths (for updates) - use originalPath if available, otherwise extract from URL
+      const existingImageUrls = imagePreviews
+        .filter(preview => preview.isExisting)
+        .map(preview => {
+          if (preview.originalPath) return preview.originalPath;
+          // Extract path from full URL if originalPath not available
+          const url = preview.url;
+          if (url.startsWith('http')) {
+            const match = url.match(/\/uploads\/.*$/);
+            return match ? match[0] : url;
+          }
+          return url;
+        });
+
       // Transform form data (strings) to API format (numbers)
       const apiData = {
         name: data.name,
@@ -84,6 +148,9 @@ export default function SellerProductsPage() {
         price: typeof data.price === "string" ? parseFloat(data.price) : data.price,
         stock: typeof data.stock === "string" ? parseInt(data.stock, 10) : data.stock,
         category: data.category,
+        images: newImageFiles,
+        mainImageIndex: mainImageIndex,
+        ...(editingProduct && existingImageUrls.length > 0 && { existingImages: existingImageUrls }),
       };
 
       if (editingProduct) {
@@ -102,6 +169,8 @@ export default function SellerProductsPage() {
 
       setShowForm(false);
       setEditingProduct(null);
+      setImagePreviews([]);
+      setMainImageIndex(0);
       reset();
       loadProducts();
     } catch (error: unknown) {
@@ -134,6 +203,26 @@ export default function SellerProductsPage() {
       stock: product.stock.toString(),
       category: product.category,
     });
+    
+    // Load existing images
+    if (product.images && product.images.length > 0) {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
+      const existingPreviews: ImagePreview[] = product.images.map((img) => {
+        const originalPath = img.startsWith('http') ? img : img;
+        const displayUrl = img.startsWith('http') ? img : `${API_URL.replace('/api', '')}${img}`;
+        return {
+          url: displayUrl,
+          originalPath: originalPath,
+          isExisting: true,
+        };
+      });
+      setImagePreviews(existingPreviews);
+      setMainImageIndex(product.mainImageIndex || 0);
+    } else {
+      setImagePreviews([]);
+      setMainImageIndex(0);
+    }
+    
     setShowForm(true);
   };
 
@@ -159,6 +248,8 @@ export default function SellerProductsPage() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingProduct(null);
+    setImagePreviews([]);
+    setMainImageIndex(0);
     reset();
   };
 
@@ -256,6 +347,81 @@ export default function SellerProductsPage() {
                   <FormError>{errors.stock?.message}</FormError>
                 </div>
               </div>
+              
+              {/* Image Upload Section */}
+              <div className="space-y-2">
+                <Label>Product Images (Max 5)</Label>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      disabled={imagePreviews.length >= 5}
+                      className="cursor-pointer"
+                    />
+                    {imagePreviews.length >= 5 && (
+                      <span className="text-sm text-muted-foreground">Maximum 5 images</span>
+                    )}
+                  </div>
+                  
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-5 gap-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative group">
+                          <div className="relative aspect-square border-2 rounded-lg overflow-hidden"
+                            style={{ borderColor: mainImageIndex === index ? "hsl(var(--primary))" : "hsl(var(--border))" }}>
+                            <img
+                              src={preview.url}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            {mainImageIndex === index && (
+                              <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                                <Star className="h-4 w-4 fill-current" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setMainImage(index)}
+                                className="h-8"
+                              >
+                                Set Main
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => removeImage(index)}
+                                className="h-8"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          {mainImageIndex === index && (
+                            <p className="text-xs text-center mt-1 text-primary font-medium">Main Image</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {imagePreviews.length === 0 && (
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
+                      <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No images selected</p>
+                      <p className="text-sm">Upload up to 5 product images</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
               <div className="flex gap-2">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? (editingProduct ? "Updating..." : "Creating...") : (editingProduct ? "Update" : "Create")}

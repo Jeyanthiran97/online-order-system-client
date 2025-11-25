@@ -20,6 +20,25 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     router.push(`/products/${product._id}`);
   };
 
+  // Get main image URL
+  const getMainImageUrl = () => {
+    if (!product.images || product.images.length === 0) return null;
+    
+    const mainIndex = product.mainImageIndex ?? 0;
+    const imageUrl = product.images[mainIndex] || product.images[0];
+    
+    if (!imageUrl) return null;
+    
+    // If it's already a full URL, return it
+    if (imageUrl.startsWith('http')) return imageUrl;
+    
+    // Otherwise, construct the full URL
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
+    return `${API_URL.replace('/api', '')}${imageUrl}`;
+  };
+
+  const mainImageUrl = getMainImageUrl();
+
   return (
     <Card
       className={`group ${designSystem.card.base} ${designSystem.card.hover} ${designSystem.card.interactive} overflow-hidden border-2 hover:border-primary/50`}
@@ -28,13 +47,37 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       {/* Image Section */}
       <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-muted/80 via-muted/60 to-muted/80">
-        {/* Placeholder Icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            <Package className="h-16 w-16 text-muted-foreground/50 group-hover:text-primary/70 transition-all duration-300 group-hover:scale-110" />
-            <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {mainImageUrl ? (
+          <>
+            <img
+              src={mainImageUrl}
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              onError={(e) => {
+                // Fallback to placeholder on error
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const placeholder = target.nextElementSibling as HTMLElement;
+                if (placeholder) placeholder.style.display = 'flex';
+              }}
+            />
+            {/* Fallback placeholder (hidden by default) */}
+            <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
+              <div className="relative">
+                <Package className="h-16 w-16 text-muted-foreground/50 group-hover:text-primary/70 transition-all duration-300 group-hover:scale-110" />
+                <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Placeholder Icon */
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="relative">
+              <Package className="h-16 w-16 text-muted-foreground/50 group-hover:text-primary/70 transition-all duration-300 group-hover:scale-110" />
+              <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
