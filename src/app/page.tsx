@@ -9,7 +9,7 @@ import { categoryService, Category } from "@/services/categoryService";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -19,6 +19,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -49,6 +50,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // Only load products if user is not a seller/deliverer/admin
+    // Note: filters.search is only updated when search is triggered, not on every keystroke
     if (!authLoading && (!isAuthenticated || user?.role === "customer")) {
       loadProducts();
     }
@@ -87,6 +89,28 @@ export default function HomePage() {
     }
   };
 
+  const handleSearch = () => {
+    setFilters((prev) => ({ ...prev, search: searchInput.trim() }));
+  };
+
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setFilters({
+      search: "",
+      category: "",
+      sort: "-updatedAt",
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
+  const hasActiveFilters = filters.search || filters.category || filters.sort !== "-updatedAt";
+
   // Show loading or nothing while redirecting
   if (authLoading || (isAuthenticated && user && (user.role === "seller" || user.role === "deliverer" || user.role === "admin"))) {
     return (
@@ -110,46 +134,68 @@ export default function HomePage() {
           <p className="text-muted-foreground">Discover amazing products from trusted sellers</p>
         </div>
 
-        <div className="mb-6 flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search products..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="pl-10"
-            />
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search products..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="pl-10 pr-10"
+              />
+              {searchInput && (
+                <button
+                  onClick={handleSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-accent rounded"
+                  aria-label="Search"
+                >
+                  <Search className="h-4 w-4 text-primary" />
+                </button>
+              )}
+            </div>
+            <Select
+              value={filters.category || "all"}
+              onValueChange={(value) => setFilters({ ...filters, category: value === "all" ? "" : value })}
+            >
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category._id} value={category.name}>
+                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.sort}
+              onValueChange={(value) => setFilters({ ...filters, sort: value })}
+            >
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="-updatedAt">Newest</SelectItem>
+                <SelectItem value="price">Price: Low to High</SelectItem>
+                <SelectItem value="-price">Price: High to Low</SelectItem>
+                <SelectItem value="-rating">Highest Rated</SelectItem>
+              </SelectContent>
+            </Select>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="w-full md:w-auto"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
           </div>
-          <Select
-            value={filters.category || "all"}
-            onValueChange={(value) => setFilters({ ...filters, category: value === "all" ? "" : value })}
-          >
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category._id} value={category.name}>
-                  {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.sort}
-            onValueChange={(value) => setFilters({ ...filters, sort: value })}
-          >
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="-updatedAt">Newest</SelectItem>
-              <SelectItem value="price">Price: Low to High</SelectItem>
-              <SelectItem value="-price">Price: High to Low</SelectItem>
-              <SelectItem value="-rating">Highest Rated</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {loading ? (
