@@ -181,7 +181,7 @@ export default function AdminDeliverersPage() {
                 {deliverers.map((deliverer, index) => (
                   <TableRow key={deliverer._id || `deliverer-${index}`}>
                     <TableCell className="font-medium">{deliverer.fullName}</TableCell>
-                    <TableCell>{deliverer.userId?.email || deliverer.user?.email || "N/A"}</TableCell>
+                    <TableCell>{deliverer.user?.email || "N/A"}</TableCell>
                     <TableCell>{deliverer.licenseNumber}</TableCell>
                     <TableCell>{deliverer.NIC}</TableCell>
                     <TableCell>
