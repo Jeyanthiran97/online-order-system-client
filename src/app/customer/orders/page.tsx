@@ -1,13 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { orderService, Order } from "@/services/orderService";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
+import { 
+  Package, 
+  Clock, 
+  Truck, 
+  CheckCircle, 
+  XCircle, 
+  Filter,
+  ArrowLeft,
+  Calendar,
+  DollarSign
+} from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Link from "next/link";
+import { designSystem } from "@/lib/design-system";
 
 export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -55,90 +68,213 @@ export default function CustomerOrdersPage() {
     }
   };
 
-  return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">My Orders</h1>
-        <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="shipped">Shipped</SelectItem>
-            <SelectItem value="delivered">Delivered</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case "pending":
+      case "confirmed":
+        return <Clock className="h-5 w-5 text-yellow-600" />;
+      case "shipped":
+        return <Truck className="h-5 w-5 text-blue-600" />;
+      case "cancelled":
+        return <XCircle className="h-5 w-5 text-red-600" />;
+      default:
+        return <Package className="h-5 w-5 text-gray-600" />;
+    }
+  };
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Order History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No orders found</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order._id}>
-                    <TableCell className="font-mono text-sm">
-                      #{order._id.slice(-8)}
-                    </TableCell>
-                    <TableCell>{order.items?.length || 0} items</TableCell>
-                    <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
-                    <TableCell>
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return "bg-green-50 text-green-700 border-green-200";
+      case "pending":
+      case "confirmed":
+        return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "shipped":
+        return "bg-blue-50 text-blue-700 border-blue-200";
+      case "cancelled":
+        return "bg-red-50 text-red-700 border-red-200";
+      default:
+        return "bg-gray-50 text-gray-700 border-gray-200";
+    }
+  };
+
+  const filteredOrdersCount = orders.filter((order) => 
+    !statusFilter || order.status === statusFilter
+  ).length;
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} ${designSystem.spacing.section}`}>
+        {/* Header */}
+        <div className="mb-6 animate-fade-in">
+          <Link href="/customer">
+            <Button variant="ghost" className="mb-4 hover:bg-primary/10 transition-colors duration-200">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className={`${designSystem.typography.h1} mb-1 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent`}>
+                My Orders
+              </h1>
+              <p className={`${designSystem.typography.body} ${designSystem.typography.muted}`}>
+                View and manage all your orders
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select 
+                value={statusFilter || "all"} 
+                onValueChange={(value) => setStatusFilter(value === "all" ? "" : value)}
+              >
+                <SelectTrigger className="w-[180px] h-11 border-2 shadow-sm">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Orders List */}
+        {loading ? (
+          <div className="text-center py-12">
+            <LoadingSpinner size="lg" text="Loading orders..." />
+          </div>
+        ) : orders.length === 0 ? (
+          <Card className={`${designSystem.card.base} shadow-lg`}>
+            <CardContent className="py-12">
+              <div className="text-center">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <h3 className={`${designSystem.typography.h3} mb-2`}>No orders found</h3>
+                <p className={`${designSystem.typography.body} ${designSystem.typography.muted} mb-5`}>
+                  {statusFilter 
+                    ? `No orders with status "${statusFilter}"`
+                    : "You haven't placed any orders yet"}
+                </p>
+                {!statusFilter && (
+                  <Link href="/">
+                    <Button size="lg" className={`${designSystem.button.base} ${designSystem.button.hover}`}>
+                      Start Shopping
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            <div className={`mb-3 ${designSystem.typography.small} ${designSystem.typography.muted} animate-fade-in`}>
+              Showing {filteredOrdersCount} order{filteredOrdersCount !== 1 ? 's' : ''}
+              {statusFilter && ` with status "${statusFilter}"`}
+            </div>
+            {orders.map((order, index) => (
+              <Card 
+                key={order._id} 
+                id={`order-${order._id}`}
+                className={`${designSystem.card.base} ${designSystem.card.hover} animate-fade-in`}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <CardHeader>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2.5 bg-muted rounded-lg flex-shrink-0">
+                        {getStatusIcon(order.status)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className={`${designSystem.typography.h3} mb-1`}>
+                          Order #{order._id.slice(-8).toUpperCase()}
+                        </CardTitle>
+                        <CardDescription className={`flex items-center gap-3 flex-wrap ${designSystem.typography.small}`}>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                            {new Date(order.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Package className="h-3.5 w-3.5 flex-shrink-0" />
+                            {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                          </span>
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <div className={`${designSystem.typography.small} ${designSystem.typography.muted} flex items-center gap-1 justify-end mb-1`}>
+                          <DollarSign className="h-3.5 w-3.5" />
+                          Total Amount
+                        </div>
+                        <div className={`${designSystem.typography.h2} text-primary`}>
+                          {formatCurrency(order.totalAmount)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-4 border-t">
+                    <div className="flex items-center gap-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          order.status === "delivered"
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : order.status === "cancelled"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-1.5 ${getStatusColor(order.status)}`}
                       >
-                        {order.status}
+                        {getStatusIcon(order.status)}
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {order.status === "pending" && (
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(order.status === "pending" || order.status === "confirmed") && (
                         <Button
                           variant="destructive"
-                          size="sm"
                           onClick={() => handleCancel(order._id)}
+                          className={`${designSystem.button.base} ${designSystem.button.hover}`}
                         >
-                          Cancel
+                          <XCircle className="mr-2 h-4 w-4" />
+                          Cancel Order
                         </Button>
                       )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                      <Link href={`/products?order=${order._id}`}>
+                        <Button variant="outline" className={`${designSystem.button.base} ${designSystem.button.hover}`}>
+                          View Details
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                  {order.items && order.items.length > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <h4 className={`${designSystem.typography.small} font-semibold mb-2 ${designSystem.typography.muted}`}>Order Items:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        {order.items.slice(0, 3).map((item: any, idx: number) => (
+                          <div key={idx} className={`${designSystem.typography.small} ${designSystem.typography.muted}`}>
+                            • {item.productName || 'Product'} (x{item.quantity || 1})
+                          </div>
+                        ))}
+                        {order.items.length > 3 && (
+                          <div className={`${designSystem.typography.small} ${designSystem.typography.muted}`}>
+                            • and {order.items.length - 3} more item{(order.items.length - 3) !== 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }

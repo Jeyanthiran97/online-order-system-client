@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { designSystem } from "@/lib/design-system";
 
 export default function CustomerProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -54,17 +55,17 @@ export default function CustomerProfilePage() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <Card className="max-w-2xl mx-auto">
+    <main className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} ${designSystem.spacing.section}`}>
+      <Card className={`${designSystem.card.base} max-w-2xl mx-auto`}>
         <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Update your personal information</CardDescription>
+          <CardTitle className={designSystem.typography.h2}>Profile Settings</CardTitle>
+          <CardDescription className={designSystem.typography.small}>Update your personal information</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" value={user?.email || ""} disabled />
+              <Input id="email" value={user?.email || ""} disabled className="h-11" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
@@ -73,6 +74,7 @@ export default function CustomerProfilePage() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 required
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
@@ -83,6 +85,7 @@ export default function CustomerProfilePage() {
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 required
+                className="h-11"
               />
             </div>
             <div className="space-y-2">
@@ -92,9 +95,14 @@ export default function CustomerProfilePage() {
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 required
+                className="h-11"
               />
             </div>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className={`${designSystem.button.base} ${designSystem.button.hover}`}
+            >
               {loading ? "Updating..." : "Update Profile"}
             </Button>
           </CardContent>

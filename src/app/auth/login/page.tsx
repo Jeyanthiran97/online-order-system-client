@@ -14,6 +14,10 @@ import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
 import { loginSchema, type LoginFormData } from "@/lib/validations";
 import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
+import { designSystem } from "@/lib/design-system";
+import { Navbar } from "@/components/layouts/Navbar";
+import { Footer } from "@/components/layouts/Footer";
+import { LogIn, Mail, Lock, ShoppingBag, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -74,56 +78,111 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
-        </CardHeader>
-        <form 
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            return handleSubmit(onSubmit)(e);
-          }}
-          noValidate
-        >
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-                className={errors.email ? "border-red-500" : ""}
-              />
-              <FormError>{errors.email?.message}</FormError>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register("password")}
-                className={errors.password ? "border-red-500" : ""}
-              />
-              <FormError>{errors.password?.message}</FormError>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Button>
-            <div className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/auth/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      <Navbar />
+      
+      {/* Hero Section with Gradient Background */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+        <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent" />
+      </section>
+
+      {/* Login Form Section */}
+      <main className="flex min-h-[calc(100vh-200px)] items-center justify-center py-12 px-4">
+        <div className="w-full max-w-md animate-fade-in">
+          <Card className={`${designSystem.card.base} ${designSystem.card.hover} border-2 shadow-xl`}>
+            <CardHeader className="text-center space-y-3 pb-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-2">
+                <LogIn className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className={`${designSystem.typography.h2} text-center`}>
+                Welcome Back
+              </CardTitle>
+              <CardDescription className={`${designSystem.typography.body} text-base`}>
+                Sign in to your account to continue shopping
+              </CardDescription>
+            </CardHeader>
+            
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return handleSubmit(onSubmit)(e);
+              }}
+              noValidate
+            >
+              <CardContent className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className={`${designSystem.typography.small} font-semibold flex items-center gap-2`}>
+                    <Mail className="h-4 w-4" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    {...register("email")}
+                    className={`h-11 shadow-sm border-2 focus:border-primary transition-colors ${
+                      errors.email ? "border-destructive focus:border-destructive" : ""
+                    }`}
+                  />
+                  <FormError>{errors.email?.message}</FormError>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password" className={`${designSystem.typography.small} font-semibold flex items-center gap-2`}>
+                    <Lock className="h-4 w-4" />
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    {...register("password")}
+                    className={`h-11 shadow-sm border-2 focus:border-primary transition-colors ${
+                      errors.password ? "border-destructive focus:border-destructive" : ""
+                    }`}
+                  />
+                  <FormError>{errors.password?.message}</FormError>
+                </div>
+              </CardContent>
+              
+              <CardFooter className="flex flex-col space-y-4 pt-2">
+                <Button 
+                  type="submit" 
+                  className={`w-full h-11 ${designSystem.button.base} ${designSystem.button.hover} shadow-md`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 animate-pulse" />
+                      Logging in...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <LogIn className="h-4 w-4" />
+                      Sign In
+                    </span>
+                  )}
+                </Button>
+                
+                <div className={`text-center ${designSystem.typography.small} ${designSystem.typography.muted} pt-2`}>
+                  Don't have an account?{" "}
+                  <Link 
+                    href="/auth/signup" 
+                    className="text-primary hover:underline font-semibold transition-colors duration-200"
+                  >
+                    Create one now
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }

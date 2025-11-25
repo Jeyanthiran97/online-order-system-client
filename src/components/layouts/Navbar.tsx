@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut } from "lucide-react";
+import { ShoppingCart, User, LogOut, ShoppingBag, Menu, X } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { designSystem } from "@/lib/design-system";
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -20,65 +31,155 @@ export function Navbar() {
   const handleOpenLogin = () => {
     setAuthModalMode("login");
     setAuthModalOpen(true);
+    setMobileMenuOpen(false);
   };
 
   const handleOpenSignup = () => {
     setAuthModalMode("signup");
     setAuthModalOpen(true);
+    setMobileMenuOpen(false);
   };
 
   return (
-    <nav className="border-b bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            Online Store
+    <nav 
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/95 backdrop-blur-md shadow-lg border-b" 
+          : "bg-white border-b shadow-sm"
+      }`}
+    >
+      <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding}`}>
+        <div className="flex h-14 md:h-16 items-center justify-between">
+          <Link 
+            href="/" 
+            className={`flex items-center gap-2 ${designSystem.typography.h3} text-primary hover:opacity-80 transition-opacity duration-200`}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span>Online Store</span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-2">
             {!isAuthenticated ? (
               <>
                 <Link href="/seller/register">
-                  <Button variant="ghost">Become a Seller</Button>
+                  <Button variant="ghost" className={`hover:bg-primary/10 ${designSystem.button.base}`}>
+                    Become a Seller
+                  </Button>
                 </Link>
                 <Link href="/deliverer/register">
-                  <Button variant="ghost">Join as Deliverer</Button>
+                  <Button variant="ghost" className={`hover:bg-primary/10 ${designSystem.button.base}`}>
+                    Join as Deliverer
+                  </Button>
                 </Link>
-                <Button variant="outline" onClick={handleOpenSignup}>
+                <Button variant="outline" onClick={handleOpenSignup} className={`${designSystem.button.base} ${designSystem.button.hover}`}>
                   Signup
                 </Button>
-                <Button onClick={handleOpenLogin}>Signin</Button>
+                <Button onClick={handleOpenLogin} className={`${designSystem.button.base} ${designSystem.button.hover}`}>
+                  Signin
+                </Button>
               </>
             ) : (
               <>
                 {user?.role === "customer" && (
                   <>
                     <Link href="/customer">
-                      <Button variant="ghost">
+                      <Button variant="ghost" className="hover:bg-primary/10 transition-colors">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Button>
                     </Link>
                     <Link href="/customer/orders">
-                      <Button variant="ghost">
+                      <Button variant="ghost" className="hover:bg-primary/10 transition-colors">
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         Orders
                       </Button>
                     </Link>
                   </>
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
+                  <span className={`${designSystem.typography.small} font-medium text-foreground max-w-[150px] truncate`}>
                     {user?.email}
                   </span>
-                  <Button variant="ghost" size="icon" onClick={handleLogout}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleLogout}
+                    className={`h-8 w-8 hover:bg-destructive/10 hover:text-destructive ${designSystem.button.base}`}
+                  >
                     <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               </>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden pb-4 space-y-2 animate-fade-in">
+            {!isAuthenticated ? (
+              <>
+                <Link href="/seller/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Become a Seller
+                  </Button>
+                </Link>
+                <Link href="/deliverer/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Join as Deliverer
+                  </Button>
+                </Link>
+                <Button variant="outline" onClick={handleOpenSignup} className="w-full">
+                  Signup
+                </Button>
+                <Button onClick={handleOpenLogin} className="w-full">
+                  Signin
+                </Button>
+              </>
+            ) : (
+              <>
+                {user?.role === "customer" && (
+                  <>
+                    <Link href="/customer" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <User className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Link href="/customer/orders" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Orders
+                      </Button>
+                    </Link>
+                  </>
+                )}
+                <div className="px-3 py-2 rounded-lg bg-muted/50">
+                  <p className="text-sm font-medium mb-2">{user?.email}</p>
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleLogout}
+                    className="w-full justify-start text-destructive hover:text-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
       <AuthModal
         open={authModalOpen}
