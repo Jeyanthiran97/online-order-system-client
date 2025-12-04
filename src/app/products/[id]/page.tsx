@@ -5,7 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layouts/Navbar";
 import { productService, Product } from "@/services/productService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, Package, ChevronLeft, ChevronRight } from "lucide-react";
@@ -46,7 +52,11 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     // Only load product if user is not a seller/deliverer/admin
-    if (params.id && (!authLoading && (!isAuthenticated || user?.role === "customer"))) {
+    if (
+      params.id &&
+      !authLoading &&
+      (!isAuthenticated || user?.role === "customer")
+    ) {
       loadProduct();
     }
   }, [params.id, authLoading, isAuthenticated, user]);
@@ -70,14 +80,17 @@ export default function ProductDetailPage() {
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
-    return `${API_URL.replace('/api', '')}${imagePath}`;
+    if (imagePath.startsWith("http")) return imagePath;
+    const API_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    return `${API_URL.replace("/api", "")}${imagePath}`;
   };
 
   const getProductImages = () => {
     if (!product?.images || product.images.length === 0) return [];
-    return product.images.map(img => getImageUrl(img)).filter(Boolean) as string[];
+    return product.images
+      .map((img) => getImageUrl(img))
+      .filter(Boolean) as string[];
   };
 
   const images = getProductImages();
@@ -135,7 +148,14 @@ export default function ProductDetailPage() {
   };
 
   // Show loading or redirect if user is seller/deliverer/admin
-  if (authLoading || (isAuthenticated && user && (user.role === "seller" || user.role === "deliverer" || user.role === "admin"))) {
+  if (
+    authLoading ||
+    (isAuthenticated &&
+      user &&
+      (user.role === "seller" ||
+        user.role === "deliverer" ||
+        user.role === "admin"))
+  ) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -161,7 +181,9 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto px-4 py-12 text-center">Product not found</div>
+        <div className="container mx-auto px-4 py-12 text-center">
+          Product not found
+        </div>
       </div>
     );
   }
@@ -184,14 +206,22 @@ export default function ProductDetailPage() {
                   {images.length > 1 && (
                     <>
                       <button
-                        onClick={() => setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                        onClick={() =>
+                          setSelectedImageIndex(
+                            (prev) => (prev - 1 + images.length) % images.length
+                          )
+                        }
                         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Previous image"
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </button>
                       <button
-                        onClick={() => setSelectedImageIndex((prev) => (prev + 1) % images.length)}
+                        onClick={() =>
+                          setSelectedImageIndex(
+                            (prev) => (prev + 1) % images.length
+                          )
+                        }
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Next image"
                       >
@@ -206,7 +236,7 @@ export default function ProductDetailPage() {
                 </div>
               )}
             </div>
-            
+
             {/* Thumbnail Gallery */}
             {images.length > 1 && (
               <div className="grid grid-cols-5 gap-2">
@@ -216,8 +246,8 @@ export default function ProductDetailPage() {
                     onClick={() => setSelectedImageIndex(index)}
                     className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImageIndex === index
-                        ? 'border-primary scale-105'
-                        : 'border-transparent hover:border-primary/50'
+                        ? "border-primary scale-105"
+                        : "border-transparent hover:border-primary/50"
                     }`}
                   >
                     <img
@@ -238,20 +268,31 @@ export default function ProductDetailPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-4xl font-bold">{formatCurrency(product.price)}</span>
+                  <span className="text-4xl font-bold">
+                    {formatCurrency(product.price)}
+                  </span>
                   {product.rating && (
                     <div className="flex items-center gap-1">
                       <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                      <span className="text-lg">{product.rating.toFixed(1)}</span>
+                      <span className="text-lg">
+                        {product.rating.toFixed(1)}
+                      </span>
                     </div>
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Category: {product.category}</p>
-                  <p className="text-sm text-muted-foreground">Stock: {product.stock} available</p>
-                  {typeof product.sellerId === 'object' && product.sellerId?.shopName && (
-                    <p className="text-sm text-muted-foreground">Seller: {product.sellerId.shopName}</p>
-                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Category: {product.category}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Stock: {product.stock} available
+                  </p>
+                  {typeof product.sellerId === "object" &&
+                    product.sellerId?.shopName && (
+                      <p className="text-sm text-muted-foreground">
+                        Seller: {product.sellerId.shopName}
+                      </p>
+                    )}
                 </div>
                 {isAuthenticated && user?.role === "customer" && (
                   <div className="space-y-4 pt-4 border-t">
@@ -263,15 +304,33 @@ export default function ProductDetailPage() {
                         min="1"
                         max={product.stock}
                         value={quantity}
-                        onChange={(e) => setQuantity(Math.max(1, Math.min(product.stock, parseInt(e.target.value) || 1)))}
+                        onChange={(e) =>
+                          setQuantity(
+                            Math.max(
+                              1,
+                              Math.min(
+                                product.stock,
+                                parseInt(e.target.value) || 1
+                              )
+                            )
+                          )
+                        }
                       />
                     </div>
                     <Button
                       className="w-full"
                       onClick={handleOrder}
-                      disabled={ordering || product.stock === 0 || quantity > product.stock}
+                      disabled={
+                        ordering ||
+                        product.stock === 0 ||
+                        quantity > product.stock
+                      }
                     >
-                      {ordering ? "Placing Order..." : product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                      {ordering
+                        ? "Placing Order..."
+                        : product.stock === 0
+                        ? "Out of Stock"
+                        : "Add to Cart"}
                     </Button>
                   </div>
                 )}
@@ -283,5 +342,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
-

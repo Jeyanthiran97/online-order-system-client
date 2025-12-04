@@ -9,15 +9,32 @@ import { categoryService, Category } from "@/services/categoryService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { FormError } from "@/components/ui/form-error";
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Edit, Trash2, X, Image as ImageIcon, Star } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { productFormSchema, type ProductFormData } from "@/lib/validations";
-import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
+import {
+  getErrorMessage,
+  isCommonError,
+  mapServerErrorsToFields,
+} from "@/lib/errorHandler";
 
 interface ImagePreview {
   file?: File;
@@ -86,7 +103,7 @@ export default function SellerProductsPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newPreviews: ImagePreview[] = files.map(file => ({
+    const newPreviews: ImagePreview[] = files.map((file) => ({
       file,
       url: URL.createObjectURL(file),
     }));
@@ -95,7 +112,8 @@ export default function SellerProductsPage() {
     if (totalImages > 5) {
       toast({
         title: "Error",
-        description: "Maximum 5 images allowed. Please remove some images first.",
+        description:
+          "Maximum 5 images allowed. Please remove some images first.",
         variant: "destructive",
       });
       return;
@@ -124,17 +142,17 @@ export default function SellerProductsPage() {
     try {
       // Get new image files
       const newImageFiles = imagePreviews
-        .filter(preview => preview.file)
-        .map(preview => preview.file!);
+        .filter((preview) => preview.file)
+        .map((preview) => preview.file!);
 
       // Get existing image paths (for updates) - use originalPath if available, otherwise extract from URL
       const existingImageUrls = imagePreviews
-        .filter(preview => preview.isExisting)
-        .map(preview => {
+        .filter((preview) => preview.isExisting)
+        .map((preview) => {
           if (preview.originalPath) return preview.originalPath;
           // Extract path from full URL if originalPath not available
           const url = preview.url;
-          if (url.startsWith('http')) {
+          if (url.startsWith("http")) {
             const match = url.match(/\/uploads\/.*$/);
             return match ? match[0] : url;
           }
@@ -145,12 +163,19 @@ export default function SellerProductsPage() {
       const apiData = {
         name: data.name,
         description: data.description,
-        price: typeof data.price === "string" ? parseFloat(data.price) : data.price,
-        stock: typeof data.stock === "string" ? parseInt(data.stock, 10) : data.stock,
+        price:
+          typeof data.price === "string" ? parseFloat(data.price) : data.price,
+        stock:
+          typeof data.stock === "string"
+            ? parseInt(data.stock, 10)
+            : data.stock,
         category: data.category,
         images: newImageFiles,
         mainImageIndex: mainImageIndex,
-        ...(editingProduct && existingImageUrls.length > 0 && { existingImages: existingImageUrls }),
+        ...(editingProduct &&
+          existingImageUrls.length > 0 && {
+            existingImages: existingImageUrls,
+          }),
       };
 
       if (editingProduct) {
@@ -203,13 +228,16 @@ export default function SellerProductsPage() {
       stock: product.stock.toString(),
       category: product.category,
     });
-    
+
     // Load existing images
     if (product.images && product.images.length > 0) {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
+      const API_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
       const existingPreviews: ImagePreview[] = product.images.map((img) => {
-        const originalPath = img.startsWith('http') ? img : img;
-        const displayUrl = img.startsWith('http') ? img : `${API_URL.replace('/api', '')}${img}`;
+        const originalPath = img.startsWith("http") ? img : img;
+        const displayUrl = img.startsWith("http")
+          ? img
+          : `${API_URL.replace("/api", "")}${img}`;
         return {
           url: displayUrl,
           originalPath: originalPath,
@@ -222,7 +250,7 @@ export default function SellerProductsPage() {
       setImagePreviews([]);
       setMainImageIndex(0);
     }
-    
+
     setShowForm(true);
   };
 
@@ -266,7 +294,9 @@ export default function SellerProductsPage() {
       {showForm && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>{editingProduct ? "Edit Product" : "Add New Product"}</CardTitle>
+            <CardTitle>
+              {editingProduct ? "Edit Product" : "Add New Product"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -291,18 +321,33 @@ export default function SellerProductsPage() {
                           value={field.value}
                           onValueChange={field.onChange}
                         >
-                          <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
+                          <SelectTrigger
+                            id="category"
+                            className={errors.category ? "border-red-500" : ""}
+                          >
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                           <SelectContent>
                             {categories
-                              .filter((category) => category.name && category.name.trim() !== "")
+                              .filter(
+                                (category) =>
+                                  category.name && category.name.trim() !== ""
+                              )
                               .map((category) => {
-                                const categoryValue = (category.name?.trim() || category._id || `category-${category._id}`).trim();
-                                if (!categoryValue || categoryValue === "") return null;
+                                const categoryValue = (
+                                  category.name?.trim() ||
+                                  category._id ||
+                                  `category-${category._id}`
+                                ).trim();
+                                if (!categoryValue || categoryValue === "")
+                                  return null;
                                 return (
-                                  <SelectItem key={category._id} value={categoryValue}>
-                                    {categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1)}
+                                  <SelectItem
+                                    key={category._id}
+                                    value={categoryValue}
+                                  >
+                                    {categoryValue.charAt(0).toUpperCase() +
+                                      categoryValue.slice(1)}
                                   </SelectItem>
                                 );
                               })
@@ -347,7 +392,7 @@ export default function SellerProductsPage() {
                   <FormError>{errors.stock?.message}</FormError>
                 </div>
               </div>
-              
+
               {/* Image Upload Section */}
               <div className="space-y-2">
                 <Label>Product Images (Max 5)</Label>
@@ -363,16 +408,25 @@ export default function SellerProductsPage() {
                       className="cursor-pointer"
                     />
                     {imagePreviews.length >= 5 && (
-                      <span className="text-sm text-muted-foreground">Maximum 5 images</span>
+                      <span className="text-sm text-muted-foreground">
+                        Maximum 5 images
+                      </span>
                     )}
                   </div>
-                  
+
                   {imagePreviews.length > 0 && (
                     <div className="grid grid-cols-5 gap-4">
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="relative group">
-                          <div className="relative aspect-square border-2 rounded-lg overflow-hidden"
-                            style={{ borderColor: mainImageIndex === index ? "hsl(var(--primary))" : "hsl(var(--border))" }}>
+                          <div
+                            className="relative aspect-square border-2 rounded-lg overflow-hidden"
+                            style={{
+                              borderColor:
+                                mainImageIndex === index
+                                  ? "hsl(var(--primary))"
+                                  : "hsl(var(--border))",
+                            }}
+                          >
                             <img
                               src={preview.url}
                               alt={`Preview ${index + 1}`}
@@ -405,13 +459,15 @@ export default function SellerProductsPage() {
                             </div>
                           </div>
                           {mainImageIndex === index && (
-                            <p className="text-xs text-center mt-1 text-primary font-medium">Main Image</p>
+                            <p className="text-xs text-center mt-1 text-primary font-medium">
+                              Main Image
+                            </p>
                           )}
                         </div>
                       ))}
                     </div>
                   )}
-                  
+
                   {imagePreviews.length === 0 && (
                     <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground">
                       <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -421,10 +477,16 @@ export default function SellerProductsPage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (editingProduct ? "Updating..." : "Creating...") : (editingProduct ? "Update" : "Create")}
+                  {isSubmitting
+                    ? editingProduct
+                      ? "Updating..."
+                      : "Creating..."
+                    : editingProduct
+                    ? "Update"
+                    : "Create"}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
@@ -443,7 +505,9 @@ export default function SellerProductsPage() {
           {loading ? (
             <div className="text-center py-8">Loading...</div>
           ) : products.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No products found</div>
+            <div className="text-center py-8 text-muted-foreground">
+              No products found
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -458,8 +522,12 @@ export default function SellerProductsPage() {
               <TableBody>
                 {products.map((product) => (
                   <TableRow key={product._id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="capitalize">{product.category}</TableCell>
+                    <TableCell className="font-medium">
+                      {product.name}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {product.category}
+                    </TableCell>
                     <TableCell>{formatCurrency(product.price)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>

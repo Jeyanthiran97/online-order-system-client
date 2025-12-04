@@ -23,18 +23,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   // Get main image URL
   const getMainImageUrl = () => {
     if (!product.images || product.images.length === 0) return null;
-    
+
     const mainIndex = product.mainImageIndex ?? 0;
     const imageUrl = product.images[mainIndex] || product.images[0];
-    
+
     if (!imageUrl) return null;
-    
+
     // If it's already a full URL, return it
-    if (imageUrl.startsWith('http')) return imageUrl;
-    
+    if (imageUrl.startsWith("http")) return imageUrl;
+
     // Otherwise, construct the full URL
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://online-order-system-api.vercel.app/api";
-    return `${API_URL.replace('/api', '')}${imageUrl}`;
+    const API_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    return `${API_URL.replace("/api", "")}${imageUrl}`;
   };
 
   const mainImageUrl = getMainImageUrl();
@@ -56,13 +57,16 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               onError={(e) => {
                 // Fallback to placeholder on error
                 const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
+                target.style.display = "none";
                 const placeholder = target.nextElementSibling as HTMLElement;
-                if (placeholder) placeholder.style.display = 'flex';
+                if (placeholder) placeholder.style.display = "flex";
               }}
             />
             {/* Fallback placeholder (hidden by default) */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ display: "none" }}
+            >
               <div className="relative">
                 <Package className="h-16 w-16 text-muted-foreground/50 group-hover:text-primary/70 transition-all duration-300 group-hover:scale-110" />
                 <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -78,15 +82,17 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </div>
           </div>
         )}
-        
+
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
+
         {/* Badge Overlay */}
         {product.rating && product.rating >= 4 && (
           <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-semibold text-gray-900">{product.rating.toFixed(1)}</span>
+            <span className="text-xs font-semibold text-gray-900">
+              {product.rating.toFixed(1)}
+            </span>
           </div>
         )}
       </div>
@@ -95,10 +101,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <CardContent className="p-4 space-y-3">
         {/* Product Name */}
         <div>
-          <h3 className={`${designSystem.typography.h4} line-clamp-2 group-hover:text-primary transition-colors duration-200`}>
+          <h3
+            className={`${designSystem.typography.h4} line-clamp-2 group-hover:text-primary transition-colors duration-200`}
+          >
             {product.name}
           </h3>
-          <p className={`${designSystem.typography.small} ${designSystem.typography.muted} line-clamp-2 mt-1`}>
+          <p
+            className={`${designSystem.typography.small} ${designSystem.typography.muted} line-clamp-2 mt-1`}
+          >
             {product.description}
           </p>
         </div>
@@ -112,21 +122,24 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.rating && product.rating < 4 && (
               <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-0.5 rounded-md">
                 <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className={`${designSystem.typography.small} font-medium`}>
+                <span
+                  className={`${designSystem.typography.small} font-medium`}
+                >
                   {product.rating.toFixed(1)}
                 </span>
               </div>
             )}
           </div>
-          
-          {typeof product.sellerId === "object" && product.sellerId?.shopName && (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Store className="h-3.5 w-3.5" />
-              <span className={`${designSystem.typography.small} truncate`}>
-                {product.sellerId.shopName}
-              </span>
-            </div>
-          )}
+
+          {typeof product.sellerId === "object" &&
+            product.sellerId?.shopName && (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Store className="h-3.5 w-3.5" />
+                <span className={`${designSystem.typography.small} truncate`}>
+                  {product.sellerId.shopName}
+                </span>
+              </div>
+            )}
         </div>
       </CardContent>
 
@@ -134,7 +147,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <CardFooter className="p-4 pt-0">
         <Button
           className={`w-full ${designSystem.button.base} ${designSystem.button.hover} group/btn`}
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
             router.push(`/products/${product._id}`);
           }}
@@ -146,4 +159,3 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     </Card>
   );
 }
-

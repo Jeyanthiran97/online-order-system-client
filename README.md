@@ -5,6 +5,7 @@ A complete Next.js 14 frontend application for the Online Order System with mult
 ## Features
 
 - **Multi-Portal Architecture**:
+
   - Public portal with product browsing
   - Customer portal with order management
   - Seller portal with product and order management
@@ -12,12 +13,14 @@ A complete Next.js 14 frontend application for the Online Order System with mult
   - Admin portal with full system management
 
 - **Authentication & Authorization**:
+
   - JWT-based authentication
   - Role-based access control (RBAC)
   - Approval workflow for sellers and deliverers
   - Protected routes with middleware
 
 - **UI Components**:
+
   - Built with shadcn/ui and Tailwind CSS
   - Responsive design
   - Modern and clean interface
@@ -31,17 +34,20 @@ A complete Next.js 14 frontend application for the Online Order System with mult
 ## Setup
 
 1. **Install Dependencies**:
+
    ```bash
    npm install
    ```
 
 2. **Environment Variables**:
    Create a `.env.local` file in the root directory:
+
    ```env
-   NEXT_PUBLIC_API_URL=https://online-order-system-api.vercel.app/api
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
    ```
 
 3. **Run Development Server**:
+
    ```bash
    npm run dev
    ```
@@ -86,6 +92,7 @@ client/
 ## Routes
 
 ### Public Routes
+
 - `/` - Home page with product listing
 - `/products/[id]` - Product detail page
 - `/auth/login` - Login page
@@ -94,20 +101,24 @@ client/
 - `/deliverer/register` - Deliverer registration
 
 ### Customer Routes (Protected)
+
 - `/customer` - Customer dashboard
 - `/customer/orders` - Order history
 - `/customer/profile` - Profile management
 
 ### Seller Routes (Protected, Requires Approval)
+
 - `/seller` - Seller dashboard
 - `/seller/products` - Product management
 - `/seller/orders` - Order management
 
 ### Deliverer Routes (Protected, Requires Approval)
+
 - `/deliverer` - Deliverer dashboard
 - `/deliverer/deliveries` - Delivery management
 
 ### Admin Routes (Protected)
+
 - `/admin` - Admin dashboard with analytics
 - `/admin/users` - User management
 - `/admin/sellers` - Seller approval management
@@ -118,6 +129,7 @@ client/
 ## Key Features
 
 ### Authentication Flow
+
 1. User registers/logs in
 2. JWT token stored in cookies
 3. User profile fetched to check approval status
@@ -125,12 +137,14 @@ client/
 5. Role-based redirect after login
 
 ### Approval Workflow
+
 - Sellers and Deliverers register with pending status
 - Admin approves/rejects with reason
 - Login blocked until approved
 - Status checked on every authentication
 
 ### Route Protection
+
 - Middleware checks authentication and role
 - Redirects unauthorized users
 - Checks approval status for sellers/deliverers
@@ -149,6 +163,7 @@ client/
 ## API Integration
 
 All API calls are made through service functions in `/src/services/`:
+
 - `authService` - Authentication endpoints
 - `productService` - Product CRUD operations
 - `orderService` - Order management
@@ -156,6 +171,7 @@ All API calls are made through service functions in `/src/services/`:
 - `adminService` - Admin operations
 
 The API client (`/src/lib/api.ts`) automatically:
+
 - Adds JWT token to requests
 - Handles 401 errors (auto logout)
 - Uses the base URL from environment variables

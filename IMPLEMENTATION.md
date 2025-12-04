@@ -7,12 +7,14 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
 ## ✅ Completed Features
 
 ### 1. **Project Setup**
+
 - ✅ Updated `package.json` with all required dependencies
 - ✅ Configured API client with environment variable support
 - ✅ Set up shadcn/ui components
 - ✅ Configured Tailwind CSS
 
 ### 2. **UI Components (shadcn/ui)**
+
 - ✅ Button
 - ✅ Card
 - ✅ Input
@@ -23,18 +25,20 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
 - ✅ All components properly typed with TypeScript
 
 ### 3. **Layout Components**
+
 - ✅ **Navbar** - For public and customer portals
   - Shows "Become a Seller" and "Join as Deliverer" links
   - Signup/Signin buttons for unauthenticated users
   - User menu and logout for authenticated customers
-  
 - ✅ **Sidebar** - For seller, deliverer, and admin portals
   - Role-based menu items
   - Active route highlighting
   - User info and logout
 
 ### 4. **Authentication System**
+
 - ✅ **AuthContext** with:
+
   - JWT token management
   - User state management
   - Approval status checking for sellers/deliverers
@@ -42,6 +46,7 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Role-based redirects
 
 - ✅ **Auth Pages**:
+
   - `/auth/login` - Login page
   - `/auth/signup` - Customer registration
   - `/seller/register` - Seller registration
@@ -53,7 +58,9 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Error messages for pending/rejected accounts
 
 ### 5. **Public Portal**
+
 - ✅ `/` - Home page with:
+
   - Product listing with filtering
   - Search functionality
   - Category filter
@@ -67,12 +74,15 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Order placement
 
 ### 6. **Customer Portal** (Top Navbar Layout)
+
 - ✅ `/customer` - Dashboard with:
+
   - Order statistics
   - Recent orders
   - Quick links
 
 - ✅ `/customer/orders` - Order management:
+
   - Order history table
   - Status filtering
   - Cancel pending orders
@@ -82,13 +92,16 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Address management
 
 ### 7. **Seller Portal** (Sidebar Layout)
+
 - ✅ `/seller` - Dashboard with:
+
   - Product count
   - Order statistics
   - Sales summary
   - Recent products and orders
 
 - ✅ `/seller/products` - Product management:
+
   - Create new products
   - Edit existing products
   - Delete products
@@ -100,7 +113,9 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Update order status (confirm → ship)
 
 ### 8. **Deliverer Portal** (Sidebar Layout)
+
 - ✅ `/deliverer` - Dashboard with:
+
   - Delivery statistics
   - Status breakdown (pending, in-transit, delivered)
   - Recent deliveries
@@ -112,35 +127,42 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Start delivery → Mark delivered workflow
 
 ### 9. **Admin Portal** (Sidebar Layout)
+
 - ✅ `/admin` - Dashboard with:
+
   - System statistics cards
   - Sales by seller (Bar chart)
   - Sales distribution (Pie chart)
   - Using Recharts library
 
 - ✅ `/admin/users` - User management:
+
   - View all users
   - Filter by role
   - User status display
 
 - ✅ `/admin/sellers` - Seller approval:
+
   - View all sellers
   - Filter by status (pending/approved/rejected)
   - Approve/Reject with reason
   - Status management
 
 - ✅ `/admin/deliverers` - Deliverer approval:
+
   - View all deliverers
   - Filter by status
   - Approve/Reject with reason
   - License and NIC display
 
 - ✅ `/admin/products` - Product overview:
+
   - View all products
   - Filter by category
   - Product details table
 
 - ✅ `/admin/orders` - Order management:
+
   - View all orders
   - Filter by status
   - Assign deliverers to orders
@@ -152,6 +174,7 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
   - Comprehensive statistics
 
 ### 10. **API Services**
+
 - ✅ `authService.ts` - Authentication endpoints
 - ✅ `productService.ts` - Product CRUD operations
 - ✅ `orderService.ts` - Order management
@@ -161,6 +184,7 @@ This is a complete Next.js 14 (App Router) frontend application for the Online O
 All services properly typed with TypeScript interfaces.
 
 ### 11. **Route Protection**
+
 - ✅ Middleware (`middleware.ts`) for:
   - Authentication checking
   - Role-based access control
@@ -168,6 +192,7 @@ All services properly typed with TypeScript interfaces.
   - Automatic redirects
 
 ### 12. **Additional Features**
+
 - ✅ Toast notifications for user feedback
 - ✅ Loading states
 - ✅ Error handling
@@ -268,24 +293,27 @@ client/
 Create `.env.local` in the client directory:
 
 ```env
-NEXT_PUBLIC_API_URL=https://online-order-system-api.vercel.app/api
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
 ## Key Implementation Details
 
 ### Authentication Flow
+
 1. User logs in → JWT token stored in cookies
 2. User profile fetched → Approval status checked
 3. If seller/deliverer and not approved → Login blocked
 4. Role-based redirect to appropriate portal
 
 ### Route Protection
+
 - Middleware checks authentication on protected routes
 - Verifies role matches route requirements
 - Checks approval status for sellers/deliverers
 - Redirects unauthorized users
 
 ### API Integration
+
 - All API calls use service functions
 - Axios interceptors handle:
   - JWT token injection
@@ -293,6 +321,7 @@ NEXT_PUBLIC_API_URL=https://online-order-system-api.vercel.app/api
   - Error handling
 
 ### UI/UX Features
+
 - Toast notifications for all actions
 - Loading states on async operations
 - Error messages with user-friendly text
@@ -331,5 +360,3 @@ NEXT_PUBLIC_API_URL=https://online-order-system-api.vercel.app/api
 - Error handling is comprehensive
 - Code follows Next.js 14 App Router best practices
 - UI is built with shadcn/ui and Tailwind CSS
-
-

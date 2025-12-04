@@ -1,9 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://online-order-system-api.vercel.app/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Log API URL in development (only in browser)
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
