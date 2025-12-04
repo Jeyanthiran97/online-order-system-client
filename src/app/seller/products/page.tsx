@@ -35,6 +35,10 @@ import {
   isCommonError,
   mapServerErrorsToFields,
 } from "@/lib/errorHandler";
+import {
+  uploadImagesToCloudinary,
+  validateImageFile,
+} from "@/lib/cloudinary";
 
 interface ImagePreview {
   file?: File;
@@ -51,6 +55,7 @@ export default function SellerProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -103,12 +108,22 @@ export default function SellerProductsPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newPreviews: ImagePreview[] = files.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
+    
+    // Validate files
+    for (const file of files) {
+      const validation = validateImageFile(file, 5);
+      if (!validation.isValid) {
+        toast({
+          title: "Error",
+          description: validation.error,
+          variant: "destructive",
+        });
+        e.target.value = "";
+        return;
+      }
+    }
 
-    const totalImages = imagePreviews.length + newPreviews.length;
+    const totalImages = imagePreviews.length + files.length;
     if (totalImages > 5) {
       toast({
         title: "Error",
@@ -116,8 +131,14 @@ export default function SellerProductsPage() {
           "Maximum 5 images allowed. Please remove some images first.",
         variant: "destructive",
       });
+      e.target.value = "";
       return;
     }
+
+    const newPreviews: ImagePreview[] = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
 
     setImagePreviews([...imagePreviews, ...newPreviews]);
     e.target.value = ""; // Reset input
@@ -140,27 +161,59 @@ export default function SellerProductsPage() {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      // Get new image files
+      setUploadingImages(true);
+
+      // Get new image files to upload
       const newImageFiles = imagePreviews
         .filter((preview) => preview.file)
         .map((preview) => preview.file!);
 
-      // Get existing image paths (for updates) - use originalPath if available, otherwise extract from URL
+      // Upload new images to Cloudinary
+      let uploadedImageUrls: string[] = [];
+      if (newImageFiles.length > 0) {
+        try {
+          uploadedImageUrls = await uploadImagesToCloudinary(newImageFiles, {
+            folder: "online-shop/products",
+          });
+        } catch (uploadError) {
+          toast({
+            title: "Upload Error",
+            description:
+              getErrorMessage(uploadError) ||
+              "Failed to upload images. Please try again.",
+            variant: "destructive",
+          });
+          setUploadingImages(false);
+          return;
+        }
+      }
+
+      // Get existing image URLs (for updates)
+      // Always use originalPath for existing images to ensure exact match with database
       const existingImageUrls = imagePreviews
         .filter((preview) => preview.isExisting)
         .map((preview) => {
-          if (preview.originalPath) return preview.originalPath;
-          // Extract path from full URL if originalPath not available
-          const url = preview.url;
-          if (url.startsWith("http")) {
-            const match = url.match(/\/uploads\/.*$/);
-            return match ? match[0] : url;
-          }
-          return url;
+          // Always use originalPath for existing images (exact URL from database)
+          // This ensures proper matching when determining which images to delete
+          return preview.originalPath || preview.url;
         });
 
+      // Combine existing and new images
+      const allImageUrls = [...existingImageUrls, ...uploadedImageUrls];
+      
+      // Deduplicate by URL (client-side check to prevent sending duplicates)
+      // Use Set for simple deduplication - server will do more thorough deduplication by public ID
+      const uniqueImageUrls = Array.from(new Set(allImageUrls.filter(url => url && url.trim() !== '')));
+      
+      // Log for debugging
+      if (editingProduct) {
+        console.log('Updating product - Existing images:', existingImageUrls.length);
+        console.log('Updating product - New images:', uploadedImageUrls.length);
+        console.log('Updating product - Total unique images:', uniqueImageUrls.length);
+      }
+
       // Transform form data (strings) to API format (numbers)
-      const apiData = {
+      const apiData: any = {
         name: data.name,
         description: data.description,
         price:
@@ -170,13 +223,19 @@ export default function SellerProductsPage() {
             ? parseInt(data.stock, 10)
             : data.stock,
         category: data.category,
-        images: newImageFiles,
         mainImageIndex: mainImageIndex,
-        ...(editingProduct &&
-          existingImageUrls.length > 0 && {
-            existingImages: existingImageUrls,
-          }),
       };
+
+      // Only send images if they have changed or if we're creating a new product
+      // For updates, always send images to ensure proper replacement and deduplication
+      if (editingProduct) {
+        // Always send images array for updates to ensure server-side deduplication
+        // This prevents duplicates even if database already has them
+        apiData.images = uniqueImageUrls;
+      } else {
+        // For new products, send images
+        apiData.images = uniqueImageUrls;
+      }
 
       if (editingProduct) {
         await productService.updateProduct(editingProduct._id, apiData);
@@ -216,6 +275,8 @@ export default function SellerProductsPage() {
           variant: "destructive",
         });
       }
+    } finally {
+      setUploadingImages(false);
     }
   };
 
@@ -229,21 +290,29 @@ export default function SellerProductsPage() {
       category: product.category,
     });
 
-    // Load existing images
+    // Load existing images and deduplicate them immediately
+    // This prevents duplicates from being loaded if they already exist in the database
     if (product.images && product.images.length > 0) {
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-      const existingPreviews: ImagePreview[] = product.images.map((img) => {
-        const originalPath = img.startsWith("http") ? img : img;
-        const displayUrl = img.startsWith("http")
-          ? img
-          : `${API_URL.replace("/api", "")}${img}`;
+      // Deduplicate by URL before creating previews to prevent duplicates from multiplying
+      const uniqueImages = Array.from(new Set(product.images.filter(img => img && img.trim() !== '')));
+      
+      const existingPreviews: ImagePreview[] = uniqueImages.map((img) => {
+        // Store the exact Cloudinary URL from database as originalPath
+        // This ensures we can match it correctly when updating
+        const originalPath = img;
+        // Use the Cloudinary URL directly for display (Cloudinary URLs are already accessible)
+        const displayUrl = img;
         return {
           url: displayUrl,
-          originalPath: originalPath,
+          originalPath: originalPath, // Always store the exact URL from database
           isExisting: true,
         };
       });
+      
+      if (uniqueImages.length !== product.images.length) {
+        console.log(`Deduplicated images on load: ${product.images.length} -> ${uniqueImages.length}`);
+      }
+      
       setImagePreviews(existingPreviews);
       setMainImageIndex(product.mainImageIndex || 0);
     } else {
@@ -479,8 +548,10 @@ export default function SellerProductsPage() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting
+                <Button type="submit" disabled={isSubmitting || uploadingImages}>
+                  {uploadingImages
+                    ? "Uploading images..."
+                    : isSubmitting
                     ? editingProduct
                       ? "Updating..."
                       : "Creating..."
@@ -488,7 +559,12 @@ export default function SellerProductsPage() {
                     ? "Update"
                     : "Create"}
                 </Button>
-                <Button type="button" variant="outline" onClick={handleCancel}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isSubmitting || uploadingImages}
+                >
                   Cancel
                 </Button>
               </div>

@@ -41,7 +41,7 @@ export interface CreateProductData {
   price: number;
   category: string;
   stock: number;
-  images?: File[];
+  images?: string[]; // Changed from File[] to string[] (Cloudinary URLs)
   mainImageIndex?: number;
   existingImages?: string[];
 }
@@ -58,65 +58,46 @@ export const productService = {
   },
 
   createProduct: async (data: CreateProductData) => {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("price", data.price.toString());
-    formData.append("stock", data.stock.toString());
-    formData.append("category", data.category);
-    
-    if (data.mainImageIndex !== undefined) {
-      formData.append("mainImageIndex", data.mainImageIndex.toString());
-    }
+    const payload = {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      stock: data.stock,
+      category: data.category,
+      ...(data.mainImageIndex !== undefined && { mainImageIndex: data.mainImageIndex }),
+      ...(data.images && data.images.length > 0 && { images: data.images }),
+    };
 
-    // Append image files
-    if (data.images && data.images.length > 0) {
-      data.images.forEach((file) => {
-        formData.append("images", file);
-      });
-    }
-
-    const response = await api.post("/products", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await api.post("/products", payload);
     return response.data;
   },
 
   updateProduct: async (id: string, data: Partial<CreateProductData>) => {
-    const formData = new FormData();
+    // Combine existing images and new images
+    let allImages: string[] = [];
     
-    if (data.name !== undefined) formData.append("name", data.name);
-    if (data.description !== undefined) formData.append("description", data.description);
-    if (data.price !== undefined) formData.append("price", data.price.toString());
-    if (data.stock !== undefined) formData.append("stock", data.stock.toString());
-    if (data.category !== undefined) formData.append("category", data.category);
-    if (data.mainImageIndex !== undefined) {
-      formData.append("mainImageIndex", data.mainImageIndex.toString());
+    if (data.existingImages && data.existingImages.length > 0) {
+      allImages = [...data.existingImages];
     }
-
-    // Handle existing images (for updates where we want to keep some images)
-    if (data.existingImages !== undefined) {
-      if (Array.isArray(data.existingImages)) {
-        formData.append("existingImages", data.existingImages.join(","));
-      } else {
-        formData.append("existingImages", data.existingImages);
-      }
-    }
-
-    // Append new image files
+    
     if (data.images && data.images.length > 0) {
-      data.images.forEach((file) => {
-        formData.append("images", file);
-      });
+      allImages = [...allImages, ...data.images];
     }
 
-    const response = await api.patch(`/products/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const payload: any = {};
+    
+    if (data.name !== undefined) payload.name = data.name;
+    if (data.description !== undefined) payload.description = data.description;
+    if (data.price !== undefined) payload.price = data.price;
+    if (data.stock !== undefined) payload.stock = data.stock;
+    if (data.category !== undefined) payload.category = data.category;
+    if (data.mainImageIndex !== undefined) payload.mainImageIndex = data.mainImageIndex;
+    
+    // Always send images array, even if empty, to ensure replacement
+    // This allows removing all images by sending an empty array
+    payload.images = allImages;
+
+    const response = await api.patch(`/products/${id}`, payload);
     return response.data;
   },
 
