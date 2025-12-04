@@ -25,10 +25,13 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     category: "",
@@ -61,7 +64,9 @@ export default function HomePage() {
     // Only load products if user is not a seller/deliverer/admin
     // Note: filters.search is only updated when search is triggered, not on every keystroke
     if (!authLoading && (!isAuthenticated || user?.role === "customer")) {
-      loadProducts();
+      // Reset to page 1 when filters change
+      setCurrentPage(1);
+      loadProducts(1);
     }
   }, [filters, authLoading, isAuthenticated, user]);
 
@@ -88,17 +93,32 @@ export default function HomePage() {
     }
   };
 
-  const loadProducts = async () => {
-    setLoading(true);
+  const loadProducts = async (page: number = 1, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setServerError(null);
     try {
       const response = await productService.getProducts({
         ...filters,
         availability: "inStock",
-        limit: 20,
+        page: page,
       });
       if (response.success) {
-        setProducts(response.data || []);
+        if (append) {
+          // Append new products to existing ones
+          setProducts((prev) => [...prev, ...(response.data || [])]);
+        } else {
+          // Replace products with new ones
+          setProducts(response.data || []);
+        }
+        
+        // Check if there are more products
+        const totalPages = response.totalPages || 0;
+        setHasMore(page < totalPages);
+        setCurrentPage(page);
         setServerError(null);
       }
     } catch (error: any) {
@@ -116,6 +136,13 @@ export default function HomePage() {
       }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (!loadingMore && hasMore) {
+      loadProducts(currentPage + 1, true);
     }
   };
 
@@ -130,6 +157,7 @@ export default function HomePage() {
       category: "",
       sort: "-updatedAt",
     });
+    setCurrentPage(1);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -383,7 +411,10 @@ export default function HomePage() {
               </p>
               <Button
                 variant="outline"
-                onClick={loadProducts}
+                onClick={() => {
+                  setCurrentPage(1);
+                  loadProducts(1);
+                }}
                 className="mt-2"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -397,11 +428,35 @@ export default function HomePage() {
               <p className={designSystem.typography.small}>Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className={designSystem.grid.products}>
-              {products.map((product, index) => (
-                <ProductCard key={product._id} product={product} index={index} />
-              ))}
-            </div>
+            <>
+              <div className={designSystem.grid.products}>
+                {products.map((product, index) => (
+                  <ProductCard key={product._id} product={product} index={index} />
+                ))}
+              </div>
+              
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="flex justify-center mt-8">
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    variant="outline"
+                    size="lg"
+                    className="min-w-[200px]"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Load More Products"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
