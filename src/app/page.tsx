@@ -103,7 +103,6 @@ export default function HomePage() {
     try {
       const response = await productService.getProducts({
         ...filters,
-        availability: "inStock",
         page: page,
       });
       if (response.success) {

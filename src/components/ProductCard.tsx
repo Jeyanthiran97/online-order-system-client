@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Star, ArrowRight, Store, Sparkles } from "lucide-react";
+import { Package, Star, ArrowRight, Store, Sparkles, XCircle, Tag } from "lucide-react";
 import { Product } from "@/services/productService";
 import { formatCurrency } from "@/lib/utils";
 import { designSystem } from "@/lib/design-system";
@@ -19,6 +19,24 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const handleCardClick = () => {
     router.push(`/products/${product._id}`);
   };
+
+  // Normalize stock value to number and handle edge cases
+  const stockValue = product.stock !== undefined && product.stock !== null 
+    ? Number(product.stock) 
+    : 0;
+  const isOutOfStock = stockValue === 0;
+
+  // Normalize rating and discount
+  const ratingValue = product.rating !== undefined && product.rating !== null 
+    ? Number(product.rating) 
+    : 0;
+  const discountValue = product.discount !== undefined && product.discount !== null 
+    ? Number(product.discount) 
+    : 0;
+  const hasDiscount = discountValue > 0;
+  
+  // Calculate filled stars (0-5)
+  const filledStars = Math.floor(Math.max(0, Math.min(5, ratingValue)));
 
   // Get main image URL
   const getMainImageUrl = () => {
@@ -48,6 +66,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       {/* Image Section */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted/80 via-muted/60 to-muted/80">
+        {/* Discount/Promotion Label */}
+        {hasDiscount && (
+          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-10">
+            <Tag className="h-3 w-3" />
+            <span className="text-xs font-bold">{discountValue}% OFF</span>
+          </div>
+        )}
         {mainImageUrl ? (
           <>
             <img
@@ -86,15 +111,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Badge Overlay */}
-        {product.rating && product.rating >= 4 && (
-          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-md">
-            <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
-            <span className="text-[10px] font-semibold text-gray-900">
-              {product.rating.toFixed(1)}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Content Section */}
@@ -113,23 +129,49 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </p>
         </div>
 
-        {/* Price & Seller Info */}
+        {/* Price & Rating Info */}
         <div className="space-y-1.5">
           <div className="flex items-baseline justify-between">
-            <span className={`text-base font-bold text-primary`}>
-              {formatCurrency(product.price)}
-            </span>
-            {product.rating && product.rating < 4 && (
-              <div className="flex items-center gap-0.5 bg-yellow-50 dark:bg-yellow-900/20 px-1.5 py-0.5 rounded-md">
-                <Star className="h-2.5 w-2.5 fill-yellow-400 text-yellow-400" />
-                <span
-                  className={`text-[10px] font-medium`}
-                >
-                  {product.rating.toFixed(1)}
+            <div className="flex flex-col">
+              {hasDiscount && (
+                <span className="text-xs text-muted-foreground line-through">
+                  {formatCurrency(product.price)}
                 </span>
+              )}
+              <span className={`text-base font-bold text-primary`}>
+                {hasDiscount 
+                  ? formatCurrency(product.price * (1 - discountValue / 100))
+                  : formatCurrency(product.price)}
+              </span>
+            </div>
+            {/* Rating Stars */}
+            {ratingValue > 0 && (
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${
+                      i < filledStars
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'fill-gray-200 text-gray-200'
+                    }`}
+                  />
+                ))}
               </div>
             )}
           </div>
+
+          {/* Stock Status */}
+          {isOutOfStock ? (
+            <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+              <XCircle className="h-3 w-3" />
+              <span className="text-xs font-medium">Out of Stock</span>
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              Stock: {stockValue}
+            </span>
+          )}
 
           {typeof product.sellerId === "object" &&
             product.sellerId?.shopName && (
@@ -147,14 +189,17 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <CardFooter className="p-3 pt-0 mt-auto">
         <Button
           size="sm"
+          disabled={isOutOfStock}
           className={`w-full ${designSystem.button.base} ${designSystem.button.hover} group/btn text-xs h-8`}
           onClick={(e) => {
             e.stopPropagation();
             router.push(`/products/${product._id}`);
           }}
         >
-          <span>View Details</span>
-          <ArrowRight className="ml-1.5 h-3 w-3 transition-transform duration-200 group-hover/btn:translate-x-1" />
+          <span>{isOutOfStock ? 'Out of Stock' : 'View Details'}</span>
+          {!isOutOfStock && (
+            <ArrowRight className="ml-1.5 h-3 w-3 transition-transform duration-200 group-hover/btn:translate-x-1" />
+          )}
         </Button>
       </CardFooter>
     </Card>

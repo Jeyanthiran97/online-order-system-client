@@ -8,6 +8,7 @@ export interface Product {
   category: string;
   stock: number;
   rating?: number;
+  discount?: number;
   sellerId: string | {
     shopName: string;
   };
