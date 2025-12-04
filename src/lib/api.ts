@@ -38,14 +38,27 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log network errors for debugging
+    // Handle network errors with better error structure
     if (error.code === "ERR_NETWORK" || error.message === "Network Error") {
-      console.error("Network Error:", {
-        message: error.message,
-        code: error.code,
-        baseURL: API_URL,
-        url: error.config?.url,
-      });
+      // Log network errors for debugging in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("Network Error:", {
+          message: error.message,
+          code: error.code,
+          baseURL: API_URL,
+          url: error.config?.url,
+        });
+      }
+      
+      // Enhance error object with user-friendly message
+      error.isNetworkError = true;
+      error.userMessage = "Unable to connect to server. Please check your internet connection and ensure the server is running.";
+    }
+
+    // Handle timeout errors
+    if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+      error.isNetworkError = true;
+      error.userMessage = "Request timed out. The server is taking too long to respond. Please try again.";
     }
 
     if (error.response?.status === 401) {

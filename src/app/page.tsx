@@ -10,18 +10,24 @@ import { categoryService, Category } from "@/services/categoryService";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, X, ShoppingBag, TrendingUp, Shield, Truck } from "lucide-react";
+import { Search, X, ShoppingBag, TrendingUp, Shield, Truck, AlertCircle, RefreshCw, WifiOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import { designSystem } from "@/lib/design-system";
+import { useToast } from "@/components/ui/use-toast";
+import { getErrorMessage } from "@/lib/errorHandler";
 
 export default function HomePage() {
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [filters, setFilters] = useState({
     search: "",
@@ -60,18 +66,31 @@ export default function HomePage() {
   }, [filters, authLoading, isAuthenticated, user]);
 
   const loadCategories = async () => {
+    setCategoriesLoading(true);
+    setCategoriesError(null);
     try {
       const response = await categoryService.getCategories();
       if (response.success) {
         setCategories(response.data || []);
+        setCategoriesError(null);
       }
-    } catch (error) {
-      console.error("Failed to load categories", error);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setCategoriesError(errorMessage);
+      
+      // Only show toast for network errors to avoid spam
+      if (error.isNetworkError || error.code === "ERR_NETWORK") {
+        // Don't show toast on initial load, just set error state
+        // Toast will be shown only if user retries
+      }
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
   const loadProducts = async () => {
     setLoading(true);
+    setServerError(null);
     try {
       const response = await productService.getProducts({
         ...filters,
@@ -80,12 +99,20 @@ export default function HomePage() {
       });
       if (response.success) {
         setProducts(response.data || []);
+        setServerError(null);
       }
     } catch (error: any) {
-      console.error("Failed to load products", error);
-      // If it's a network error, show a helpful message
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-        console.error("Network error - check if API is accessible and CORS is configured");
+      const errorMessage = error.userMessage || getErrorMessage(error);
+      setServerError(errorMessage);
+      
+      // Show toast notification for network errors
+      if (error.isNetworkError || error.code === "ERR_NETWORK") {
+        toast({
+          title: "Connection Error",
+          description: errorMessage,
+          variant: "destructive",
+          duration: 5000,
+        });
       }
     } finally {
       setLoading(false);
@@ -131,6 +158,41 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <Navbar />
+      
+      {/* Server Error Banner */}
+      {(serverError || categoriesError) && (
+        <div className="bg-red-50 border-b border-red-200">
+          <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} py-3`}>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <WifiOff className="h-5 w-5 text-red-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-900">
+                    {serverError || categoriesError}
+                  </p>
+                  <p className="text-xs text-red-700 mt-0.5">
+                    Some features may be unavailable. Please check your connection or try again later.
+                  </p>
+                </div>
+              </div>
+              {(serverError || categoriesError) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (serverError) loadProducts();
+                    if (categoriesError) loadCategories();
+                  }}
+                  className="border-red-300 text-red-700 hover:bg-red-100 flex-shrink-0"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
@@ -309,6 +371,24 @@ export default function HomePage() {
           {loading ? (
             <div className="text-center py-12">
               <LoadingSpinner size="lg" text="Loading products..." />
+            </div>
+          ) : serverError ? (
+            <div className="text-center py-12">
+              <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-3 opacity-75" />
+              <p className={`${designSystem.typography.body} text-gray-700 mb-1 font-medium`}>
+                Unable to load products
+              </p>
+              <p className={`${designSystem.typography.small} text-muted-foreground mb-4`}>
+                {serverError}
+              </p>
+              <Button
+                variant="outline"
+                onClick={loadProducts}
+                className="mt-2"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Try Again
+              </Button>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-12">

@@ -70,7 +70,13 @@ export function getErrorMessage(error: unknown): string {
     return "An unexpected error occurred";
   }
 
-  const axiosError = error as AxiosError<ServerErrorResponse>;
+  const axiosError = error as AxiosError<ServerErrorResponse> & { userMessage?: string; isNetworkError?: boolean };
+  
+  // Check for custom user-friendly message added by API interceptor
+  if (axiosError.userMessage) {
+    return axiosError.userMessage;
+  }
+
   const response = axiosError.response?.data;
 
   if (response?.error) {
@@ -83,8 +89,8 @@ export function getErrorMessage(error: unknown): string {
 
   if (axiosError.message) {
     // Handle network errors
-    if (axiosError.code === "ERR_NETWORK" || axiosError.message.includes("Network Error")) {
-      return "Network error. Please check your connection and try again.";
+    if (axiosError.isNetworkError || axiosError.code === "ERR_NETWORK" || axiosError.message.includes("Network Error")) {
+      return "Unable to connect to server. Please check your internet connection and ensure the server is running.";
     }
     return axiosError.message;
   }
