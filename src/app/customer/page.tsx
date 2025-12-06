@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { orderService, Order } from "@/services/orderService";
+import { orderService } from "@/services/orderService";
+import { Order } from "@/types/order";
 import { useAuth } from "@/contexts/AuthContext";
 import { Package, ShoppingCart, CheckCircle, TrendingUp, ArrowRight, Clock, Truck } from "lucide-react";
 import Link from "next/link";

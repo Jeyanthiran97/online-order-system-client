@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { adminService, User } from "@/services/adminService";
+import { adminService } from "@/services/adminService";
+import { User } from "@/types/user";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -107,7 +108,7 @@ export default function AdminUsersPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString()}
+                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
                     </TableCell>
                   </TableRow>
                 ))}

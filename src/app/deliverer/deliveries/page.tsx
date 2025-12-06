@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { deliveryService, Delivery } from "@/services/deliveryService";
+import { deliveryService } from "@/services/deliveryService";
+import { Delivery } from "@/types/delivery";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package, Star, ArrowRight, Store, Sparkles, XCircle, Tag } from "lucide-react";
-import { Product } from "@/services/productService";
+import { Product } from "@/types/product";
 import { formatCurrency } from "@/lib/utils";
 import { designSystem } from "@/lib/design-system";
 

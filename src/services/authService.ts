@@ -1,32 +1,9 @@
 import api from "@/lib/api";
+import { LoginCredentials, RegisterCustomerData } from "@/types/user";
+import { RegisterSellerData } from "@/types/seller";
+import { RegisterDelivererData } from "@/types/deliverer";
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCustomerData {
-  email: string;
-  password: string;
-  fullName: string;
-  phone: string;
-  address: string;
-}
-
-export interface RegisterSellerData {
-  email: string;
-  password: string;
-  shopName: string;
-  documents?: string[];
-}
-
-export interface RegisterDelivererData {
-  email: string;
-  password: string;
-  fullName: string;
-  licenseNumber: string;
-  NIC: string;
-}
+export type { LoginCredentials, RegisterCustomerData, RegisterSellerData, RegisterDelivererData };
 
 export const authService = {
   login: async (credentials: LoginCredentials) => {

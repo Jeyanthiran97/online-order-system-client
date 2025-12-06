@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layouts/Navbar";
-import { productService, Product } from "@/services/productService";
+import { productService } from "@/services/productService";
+import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import {
   Card,

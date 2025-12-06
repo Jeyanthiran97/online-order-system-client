@@ -4,22 +4,9 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import Cookies from 'js-cookie';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { User, UserRole } from '@/types/user';
 
-// Define User type based on PRD
-export type UserRole = 'customer' | 'seller' | 'deliverer' | 'admin';
-
-export interface User {
-  _id: string;
-  email: string;
-  role: UserRole;
-  isActive: boolean;
-  profile?: {
-    status?: 'pending' | 'approved' | 'rejected';
-    shopName?: string;
-    fullName?: string;
-    [key: string]: any;
-  };
-}
+export type { UserRole };
 
 interface AuthContextType {
   user: User | null;

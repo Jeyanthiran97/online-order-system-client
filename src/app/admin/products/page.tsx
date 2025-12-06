@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { productService, Product } from "@/services/productService";
-import { adminService, Seller } from "@/services/adminService";
-import { categoryService, Category } from "@/services/categoryService";
+import { productService } from "@/services/productService";
+import { adminService } from "@/services/adminService";
+import { categoryService } from "@/services/categoryService";
+import { Product } from "@/types/product";
+import { Seller } from "@/types/seller";
+import { Category } from "@/types/category";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";

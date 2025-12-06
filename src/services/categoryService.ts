@@ -1,19 +1,7 @@
 import api from "@/lib/api";
+import { Category, CreateCategoryData } from "@/types/category";
 
-export interface Category {
-  _id: string;
-  name: string;
-  description?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateCategoryData {
-  name: string;
-  description?: string;
-  isActive?: boolean;
-}
+export type { Category, CreateCategoryData };
 
 export const categoryService = {
   getCategories: async () => {
