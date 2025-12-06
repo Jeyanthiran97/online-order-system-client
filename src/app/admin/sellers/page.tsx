@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { adminService } from "@/services/adminService";
+import { userService } from "@/services/user.service";
 import { Seller } from "@/types/seller";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export default function AdminSellersPage() {
   const loadSellers = async () => {
     setLoading(true);
     try {
-      const response = await adminService.getSellers({
+      const response = await userService.getSellers({
         ...(statusFilter && { status: statusFilter }),
         sort: "-createdAt",
       });
@@ -115,9 +115,9 @@ export default function AdminSellersPage() {
     try {
       let response;
       if (statusModal.type === "approve") {
-        response = await adminService.approveSeller(statusModal.sellerId);
+        response = await userService.approveSeller(statusModal.sellerId);
       } else {
-        response = await adminService.rejectSeller(statusModal.sellerId, modalReason);
+        response = await userService.rejectSeller(statusModal.sellerId, modalReason);
       }
 
       if (response.success) {

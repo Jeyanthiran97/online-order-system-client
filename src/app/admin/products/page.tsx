@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { productService } from "@/services/productService";
-import { adminService } from "@/services/adminService";
-import { categoryService } from "@/services/categoryService";
+import { productService } from "@/services/product.service";
+import { userService } from "@/services/user.service";
+import { categoryService } from "@/services/category.service";
 import { Product } from "@/types/product";
 import { Seller } from "@/types/seller";
 import { Category } from "@/types/category";
@@ -31,7 +31,7 @@ export default function AdminProductsPage() {
 
   const loadSellers = async () => {
     try {
-      const response = await adminService.getSellers({ status: "approved" });
+      const response = await userService.getSellers({ status: "approved" });
       if (response.success) {
         setSellers(response.data || []);
       }

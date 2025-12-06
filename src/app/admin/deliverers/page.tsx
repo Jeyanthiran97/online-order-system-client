@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { adminService } from "@/services/adminService";
+import { userService } from "@/services/user.service";
 import { Deliverer } from "@/types/deliverer";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export default function AdminDeliverersPage() {
   const loadDeliverers = async () => {
     setLoading(true);
     try {
-      const response = await adminService.getDeliverers({
+      const response = await userService.getDeliverers({
         ...(statusFilter && { status: statusFilter }),
         sort: "-createdAt",
       });
@@ -117,9 +117,9 @@ export default function AdminDeliverersPage() {
     try {
       let response;
       if (statusModal.type === "approve") {
-        response = await adminService.approveDeliverer(statusModal.delivererId);
+        response = await userService.approveDeliverer(statusModal.delivererId);
       } else {
-        response = await adminService.rejectDeliverer(statusModal.delivererId, modalReason);
+        response = await userService.rejectDeliverer(statusModal.delivererId, modalReason);
       }
 
       if (response.success) {

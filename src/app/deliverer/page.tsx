@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { deliveryService } from "@/services/deliveryService";
+import { deliveryService } from "@/services/delivery.service";
 import { Delivery } from "@/types/delivery";
 import { Truck, Package, CheckCircle, Clock } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";

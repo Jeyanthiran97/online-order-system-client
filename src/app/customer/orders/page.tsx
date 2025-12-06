@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { orderService } from "@/services/orderService";
+import { orderService } from "@/services/order.service";
 import { Order } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";

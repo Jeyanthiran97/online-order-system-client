@@ -8,7 +8,7 @@ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   console.log("API URL:", API_URL);
 }
 
-const api = axios.create({
+const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
@@ -17,7 +17,7 @@ const api = axios.create({
 });
 
 // Request interceptor to add token
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
     if (token) {
@@ -35,7 +35,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor to handle errors
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle network errors with better error structure
@@ -74,4 +74,5 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+export default apiClient;
+

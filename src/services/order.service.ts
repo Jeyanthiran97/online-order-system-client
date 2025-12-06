@@ -1,30 +1,30 @@
-import api from "@/lib/api";
+import apiClient from "@/lib/apiClient";
 import { Order, OrderItem, OrderFilters, CreateOrderData } from "@/types/order";
 
 export type { Order, OrderItem, OrderFilters, CreateOrderData };
 
 export const orderService = {
   getOrders: async (filters?: OrderFilters) => {
-    const response = await api.get("/orders", { params: filters });
+    const response = await apiClient.get("/orders", { params: filters });
     return response.data;
   },
 
   getOrder: async (id: string) => {
-    const response = await api.get(`/orders/${id}`);
+    const response = await apiClient.get(`/orders/${id}`);
     return response.data;
   },
 
   createOrder: async (data: CreateOrderData) => {
-    const response = await api.post("/orders", data);
+    const response = await apiClient.post("/orders", data);
     return response.data;
   },
 
-  updateOrder: async (id: string, data: { status?: string; assignedDelivererId?: string }) => {
-    const response = await api.patch(`/orders/${id}`, data);
+  updateOrder: async (
+    id: string,
+    data: { status?: string; assignedDelivererId?: string }
+  ) => {
+    const response = await apiClient.patch(`/orders/${id}`, data);
     return response.data;
   },
 };
-
-
-
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { orderService } from "@/services/orderService";
-import { productService } from "@/services/productService";
+import { orderService } from "@/services/order.service";
+import { productService } from "@/services/product.service";
 import { Order } from "@/types/order";
 import { Product } from "@/types/product";
 import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";

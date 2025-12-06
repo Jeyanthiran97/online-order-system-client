@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/layouts/Navbar";
-import { productService } from "@/services/productService";
+import { productService } from "@/services/product.service";
 import { Product } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { orderService } from "@/services/orderService";
+import { orderService } from "@/services/order.service";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";

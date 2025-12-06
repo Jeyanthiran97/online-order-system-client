@@ -17,3 +17,4 @@ export interface RegisterSellerData {
   documents?: string[];
 }
 
+

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { adminService } from "@/services/adminService";
+import { userService } from "@/services/user.service";
 import { User } from "@/types/user";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,7 +19,7 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await adminService.getUsers({
+      const response = await userService.getUsers({
         ...(roleFilter && { role: roleFilter }),
         sort: "-createdAt",
       });

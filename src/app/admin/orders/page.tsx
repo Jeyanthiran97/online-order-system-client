@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { orderService } from "@/services/orderService";
+import { orderService } from "@/services/order.service";
 import { Order } from "@/types/order";
-import { adminService } from "@/services/adminService";
+import { userService } from "@/services/user.service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,7 +30,7 @@ export default function AdminOrdersPage() {
           ...(statusFilter && { status: statusFilter }),
           sort: "-createdAt",
         }),
-        adminService.getDeliverers({ status: "approved" }),
+        userService.getDeliverers({ status: "approved" }),
       ]);
 
       if (ordersRes.success) {

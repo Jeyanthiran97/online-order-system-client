@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { adminService } from "@/services/adminService";
+import { userService } from "@/services/user.service";
 import { Analytics } from "@/types/analytics";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   const loadAnalytics = async () => {
     try {
-      const response = await adminService.getAnalytics();
+      const response = await userService.getAnalytics();
       if (response.success) {
         setAnalytics(response.data);
       }
