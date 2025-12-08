@@ -7,6 +7,7 @@ import { Delivery } from "@/types/delivery";
 import { Truck, Package, CheckCircle, Clock } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/AuthContext";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function DelivererDashboard() {
   const { loading: authLoading } = useAuth();
@@ -137,17 +138,9 @@ export default function DelivererDashboard() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        delivery.status === "delivered"
-                          ? "bg-green-100 text-green-800"
-                          : delivery.status === "in-transit"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
+                    <StatusBadge status={delivery.status as any}>
                       {delivery.status}
-                    </span>
+                    </StatusBadge>
                   </div>
                 </div>
               ))}

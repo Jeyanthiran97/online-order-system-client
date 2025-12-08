@@ -25,6 +25,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -37,6 +38,83 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
+  /* Semantic Status Colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-light: var(--success-light);
+  --color-success-light-foreground: var(--success-light-foreground);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-light: var(--warning-light);
+  --color-warning-light-foreground: var(--warning-light-foreground);
+  --color-warning-border: var(--warning-border);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-light: var(--info-light);
+  --color-info-light-foreground: var(--info-light-foreground);
+  --color-info-border: var(--info-border);
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-light: var(--danger-light);
+  --color-danger-light-foreground: var(--danger-light-foreground);
+  --color-danger-border: var(--danger-border);
+  
+  /* Status-specific colors */
+  --color-status-delivered: var(--status-delivered);
+  --color-status-delivered-foreground: var(--status-delivered-foreground);
+  --color-status-delivered-light: var(--status-delivered-light);
+  --color-status-delivered-light-foreground: var(--status-delivered-light-foreground);
+  --color-status-delivered-border: var(--status-delivered-border);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-pending-light: var(--status-pending-light);
+  --color-status-pending-light-foreground: var(--status-pending-light-foreground);
+  --color-status-pending-border: var(--status-pending-border);
+  --color-status-shipped: var(--status-shipped);
+  --color-status-shipped-foreground: var(--status-shipped-foreground);
+  --color-status-shipped-light: var(--status-shipped-light);
+  --color-status-shipped-light-foreground: var(--status-shipped-light-foreground);
+  --color-status-shipped-border: var(--status-shipped-border);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-foreground: var(--status-cancelled-foreground);
+  --color-status-cancelled-light: var(--status-cancelled-light);
+  --color-status-cancelled-light-foreground: var(--status-cancelled-light-foreground);
+  --color-status-cancelled-border: var(--status-cancelled-border);
+  
+  /* Hero/Gradient colors */
+  --color-hero-bg-start: var(--hero-bg-start);
+  --color-hero-bg-mid: var(--hero-bg-mid);
+  --color-hero-bg-end: var(--hero-bg-end);
+  --color-hero-text: var(--hero-text);
+  --color-hero-accent-1: var(--hero-accent-1);
+  --color-hero-accent-2: var(--hero-accent-2);
+  --color-hero-accent-3: var(--hero-accent-3);
+  
+  /* Footer colors */
+  --color-footer-bg-start: var(--footer-bg-start);
+  --color-footer-bg-mid: var(--footer-bg-mid);
+  --color-footer-bg-end: var(--footer-bg-end);
+  --color-footer-text: var(--footer-text);
+  --color-footer-text-muted: var(--footer-text-muted);
+  --color-footer-text-subtle: var(--footer-text-subtle);
+  --color-footer-border: var(--footer-border);
+  --color-footer-icon-bg: var(--footer-icon-bg);
+  
+  /* Rating/Star colors */
+  --color-rating-filled: var(--rating-filled);
+  --color-rating-empty: var(--rating-empty);
+  
+  /* Discount/Badge colors */
+  --color-discount-bg: var(--discount-bg);
+  --color-discount-text: var(--discount-text);
+  
+  /* Surface colors */
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -51,15 +129,16 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --primary: #283618;
+  --primary-foreground: #ffffff;
+  --secondary: #bc6c25;
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent: #bc6c25;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -70,12 +149,88 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #283618;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Semantic Status Colors - Proper Contrast */
+  --success: oklch(0.5 0.2 145);
+  --success-foreground: oklch(0.98 0 0);
+  --success-light: oklch(0.95 0.08 145);
+  --success-light-foreground: oklch(0.25 0.15 145);
+  --success-border: oklch(0.8 0.12 145);
+  --warning: oklch(0.65 0.2 85);
+  --warning-foreground: oklch(0.15 0 0);
+  --warning-light: oklch(0.96 0.08 85);
+  --warning-light-foreground: oklch(0.3 0.15 85);
+  --warning-border: oklch(0.85 0.12 85);
+  --info: oklch(0.55 0.18 240);
+  --info-foreground: oklch(0.98 0 0);
+  --info-light: oklch(0.94 0.08 240);
+  --info-light-foreground: oklch(0.25 0.15 240);
+  --info-border: oklch(0.8 0.12 240);
+  --danger: oklch(0.55 0.22 27);
+  --danger-foreground: oklch(0.98 0 0);
+  --danger-light: oklch(0.96 0.08 27);
+  --danger-light-foreground: oklch(0.3 0.18 27);
+  --danger-border: oklch(0.85 0.12 27);
+  
+  /* Status-specific colors - Using semantic colors with proper contrast */
+  --status-delivered: var(--success);
+  --status-delivered-foreground: var(--success-foreground);
+  --status-delivered-light: var(--success-light);
+  --status-delivered-light-foreground: var(--success-light-foreground);
+  --status-delivered-border: var(--success-border);
+  --status-pending: var(--warning);
+  --status-pending-foreground: var(--warning-foreground);
+  --status-pending-light: var(--warning-light);
+  --status-pending-light-foreground: var(--warning-light-foreground);
+  --status-pending-border: var(--warning-border);
+  --status-shipped: var(--info);
+  --status-shipped-foreground: var(--info-foreground);
+  --status-shipped-light: var(--info-light);
+  --status-shipped-light-foreground: var(--info-light-foreground);
+  --status-shipped-border: var(--info-border);
+  --status-cancelled: var(--danger);
+  --status-cancelled-foreground: var(--danger-foreground);
+  --status-cancelled-light: var(--danger-light);
+  --status-cancelled-light-foreground: var(--danger-light-foreground);
+  --status-cancelled-border: var(--danger-border);
+  
+  /* Hero/Gradient colors */
+  --hero-bg-start: #283618;
+  --hero-bg-mid: #283618;
+  --hero-bg-end: #283618;
+  --hero-text: #ffffff;
+  --hero-accent-1: #bc6c25;
+  --hero-accent-2: #bc6c25;
+  --hero-accent-3: #bc6c25;
+  
+  /* Footer colors */
+  --footer-bg-start: #283618;
+  --footer-bg-mid: #283618;
+  --footer-bg-end: #283618;
+  --footer-text: #ffffff;
+  --footer-text-muted: oklch(0.85 0 0);
+  --footer-text-subtle: oklch(0.7 0 0);
+  --footer-border: oklch(0.4 0 0);
+  --footer-icon-bg: oklch(0.4 0 0);
+  
+  /* Rating/Star colors */
+  --rating-filled: oklch(0.75 0.15 85);
+  --rating-empty: oklch(0.9 0 0);
+  
+  /* Discount/Badge colors */
+  --discount-bg: var(--destructive);
+  --discount-text: var(--destructive-foreground);
+  
+  /* Surface colors */
+  --surface: oklch(0.98 0 0);
+  --surface-hover: oklch(0.95 0 0);
+  --surface-active: oklch(0.92 0 0);
 }
 
 .dark {
@@ -85,15 +240,16 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --primary: #283618;
+  --primary-foreground: #ffffff;
+  --secondary: #bc6c25;
+  --secondary-foreground: #ffffff;
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --accent: #bc6c25;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -104,12 +260,88 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #283618;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  
+  /* Semantic Status Colors - Dark Mode - Proper Contrast */
+  --success: oklch(0.65 0.2 145);
+  --success-foreground: oklch(0.98 0 0);
+  --success-light: oklch(0.25 0.08 145);
+  --success-light-foreground: oklch(0.85 0.1 145);
+  --success-border: oklch(0.4 0.12 145);
+  --warning: oklch(0.75 0.18 85);
+  --warning-foreground: oklch(0.1 0 0);
+  --warning-light: oklch(0.25 0.08 85);
+  --warning-light-foreground: oklch(0.85 0.1 85);
+  --warning-border: oklch(0.4 0.12 85);
+  --info: oklch(0.6 0.18 240);
+  --info-foreground: oklch(0.98 0 0);
+  --info-light: oklch(0.25 0.08 240);
+  --info-light-foreground: oklch(0.85 0.1 240);
+  --info-border: oklch(0.4 0.12 240);
+  --danger: oklch(0.65 0.22 27);
+  --danger-foreground: oklch(0.98 0 0);
+  --danger-light: oklch(0.25 0.08 27);
+  --danger-light-foreground: oklch(0.85 0.12 27);
+  --danger-border: oklch(0.4 0.12 27);
+  
+  /* Status-specific colors - Dark Mode - Using semantic colors */
+  --status-delivered: var(--success);
+  --status-delivered-foreground: var(--success-foreground);
+  --status-delivered-light: var(--success-light);
+  --status-delivered-light-foreground: var(--success-light-foreground);
+  --status-delivered-border: var(--success-border);
+  --status-pending: var(--warning);
+  --status-pending-foreground: var(--warning-foreground);
+  --status-pending-light: var(--warning-light);
+  --status-pending-light-foreground: var(--warning-light-foreground);
+  --status-pending-border: var(--warning-border);
+  --status-shipped: var(--info);
+  --status-shipped-foreground: var(--info-foreground);
+  --status-shipped-light: var(--info-light);
+  --status-shipped-light-foreground: var(--info-light-foreground);
+  --status-shipped-border: var(--info-border);
+  --status-cancelled: var(--danger);
+  --status-cancelled-foreground: var(--danger-foreground);
+  --status-cancelled-light: var(--danger-light);
+  --status-cancelled-light-foreground: var(--danger-light-foreground);
+  --status-cancelled-border: var(--danger-border);
+  
+  /* Hero/Gradient colors - Dark Mode */
+  --hero-bg-start: #283618;
+  --hero-bg-mid: #283618;
+  --hero-bg-end: #283618;
+  --hero-text: #ffffff;
+  --hero-accent-1: #bc6c25;
+  --hero-accent-2: #bc6c25;
+  --hero-accent-3: #bc6c25;
+  
+  /* Footer colors - Dark Mode */
+  --footer-bg-start: oklch(0.15 0 0);
+  --footer-bg-mid: oklch(0.2 0 0);
+  --footer-bg-end: oklch(0.15 0 0);
+  --footer-text: oklch(0.985 0 0);
+  --footer-text-muted: oklch(0.6 0 0);
+  --footer-text-subtle: oklch(0.4 0 0);
+  --footer-border: oklch(0.25 0 0);
+  --footer-icon-bg: oklch(0.25 0 0);
+  
+  /* Rating/Star colors - Dark Mode */
+  --rating-filled: oklch(0.8 0.15 85);
+  --rating-empty: oklch(0.3 0 0);
+  
+  /* Discount/Badge colors - Dark Mode */
+  --discount-bg: var(--destructive);
+  --discount-text: var(--destructive-foreground);
+  
+  /* Surface colors - Dark Mode */
+  --surface: oklch(0.2 0 0);
+  --surface-hover: oklch(0.25 0 0);
+  --surface-active: oklch(0.3 0 0);
 }
 
 @layer base {

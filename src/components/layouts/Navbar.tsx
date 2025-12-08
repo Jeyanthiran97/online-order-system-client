@@ -44,8 +44,8 @@ export function Navbar() {
     <nav 
       className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? "bg-white/95 backdrop-blur-md shadow-lg border-b" 
-          : "bg-white border-b shadow-sm"
+          ? "bg-background/95 backdrop-blur-md shadow-lg border-b border-border" 
+          : "bg-background border-b border-border shadow-sm"
       }`}
     >
       <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding}`}>
@@ -63,12 +63,12 @@ export function Navbar() {
             {!isAuthenticated ? (
               <>
                 <Link href="/seller/register">
-                  <Button variant="ghost" className={`hover:bg-primary/10 ${designSystem.button.base}`}>
+                  <Button variant="ghost" className={`hover:bg-primary/10 hover:text-primary ${designSystem.button.base}`}>
                     Become a Seller
                   </Button>
                 </Link>
                 <Link href="/deliverer/register">
-                  <Button variant="ghost" className={`hover:bg-primary/10 ${designSystem.button.base}`}>
+                  <Button variant="ghost" className={`hover:bg-primary/10 hover:text-primary ${designSystem.button.base}`}>
                     Join as Deliverer
                   </Button>
                 </Link>
@@ -84,13 +84,13 @@ export function Navbar() {
                 {user?.role === "customer" && (
                   <>
                     <Link href="/customer">
-                      <Button variant="ghost" className="hover:bg-primary/10 transition-colors">
+                      <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </Button>
                     </Link>
                     <Link href="/customer/orders">
-                      <Button variant="ghost" className="hover:bg-primary/10 transition-colors">
+                      <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors">
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         Orders
                       </Button>
@@ -105,7 +105,7 @@ export function Navbar() {
                     variant="ghost" 
                     size="icon" 
                     onClick={handleLogout}
-                    className={`h-8 w-8 hover:bg-destructive/10 hover:text-destructive ${designSystem.button.base}`}
+                    className={`h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors ${designSystem.button.base}`}
                   >
                     <LogOut className="h-4 w-4" />
                   </Button>

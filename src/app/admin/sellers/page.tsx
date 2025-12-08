@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Edit, CheckCircle, XCircle } from "lucide-react";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function AdminSellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -180,17 +181,9 @@ export default function AdminSellersPage() {
                     <TableCell className="font-medium">{seller.shopName}</TableCell>
                     <TableCell>{seller.user?.email || "N/A"}</TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          seller.status === "approved"
-                            ? "bg-green-100 text-green-800"
-                            : seller.status === "rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
+                      <StatusBadge status={seller.status as any}>
                         {seller.status}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface FormErrorProps {
   children?: ReactNode;
@@ -9,7 +10,7 @@ export function FormError({ children, className = "" }: FormErrorProps) {
   if (!children) return null;
 
   return (
-    <p className={`text-sm text-red-600 mt-1 ${className}`}>
+    <p className={cn("text-sm text-destructive mt-1", className)}>
       {children}
     </p>
   );

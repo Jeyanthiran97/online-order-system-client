@@ -17,6 +17,7 @@ import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/e
 import { designSystem } from "@/lib/design-system";
 import { Navbar } from "@/components/layouts/Navbar";
 import { Footer } from "@/components/layouts/Footer";
+import { HeroSection } from "@/components/ui/hero-section";
 import { LogIn, Mail, Lock, ShoppingBag, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
@@ -78,15 +79,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section with Gradient Background */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20" />
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent" />
-      </section>
+      <HeroSection className="h-32" />
 
       {/* Login Form Section */}
       <main className="flex min-h-[calc(100vh-200px)] items-center justify-center py-12 px-4">

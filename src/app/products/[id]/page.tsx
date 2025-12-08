@@ -158,7 +158,7 @@ export default function ProductDetailPage() {
         user.role === "admin"))
   ) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-12 text-center">
           <LoadingSpinner size="lg" text="Loading..." />
@@ -169,7 +169,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-12 text-center">
           <LoadingSpinner size="lg" text="Loading product..." />
@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-12 text-center">
           Product not found
@@ -190,7 +190,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
                             (prev) => (prev - 1 + images.length) % images.length
                           )
                         }
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-foreground/50 hover:bg-foreground/70 text-background p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Previous image"
                       >
                         <ChevronLeft className="h-5 w-5" />
@@ -223,7 +223,7 @@ export default function ProductDetailPage() {
                             (prev) => (prev + 1) % images.length
                           )
                         }
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-foreground/50 hover:bg-foreground/70 text-background p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                         aria-label="Next image"
                       >
                         <ChevronRight className="h-5 w-5" />
@@ -274,7 +274,7 @@ export default function ProductDetailPage() {
                   </span>
                   {product.rating && (
                     <div className="flex items-center gap-1">
-                      <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      <Star className="h-5 w-5 fill-rating-filled text-rating-filled" />
                       <span className="text-lg">
                         {product.rating.toFixed(1)}
                       </span>

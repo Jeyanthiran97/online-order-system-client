@@ -6,6 +6,7 @@ import { userService } from "@/services/user.service";
 import { User } from "@/types/user";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -92,20 +93,14 @@ export default function AdminUsersPage() {
                   <TableRow key={user._id || `user-${index}`}>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                      <StatusBadge status="default">
                         {user.role}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          user.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
+                      <StatusBadge status={user.isActive ? "active" : "inactive"}>
                         {user.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}

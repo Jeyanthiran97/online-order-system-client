@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { designSystem } from "@/lib/design-system";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function CustomerDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -51,38 +52,11 @@ export default function CustomerDashboard() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "pending":
-      case "confirmed":
-        return <Clock className="h-5 w-5 text-yellow-600" />;
-      case "shipped":
-        return <Truck className="h-5 w-5 text-blue-600" />;
-      default:
-        return <Package className="h-5 w-5 text-gray-600" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "pending":
-      case "confirmed":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "shipped":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
-  };
 
   // Show loading while auth is initializing
   if (authLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <main className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <LoadingSpinner size="lg" text="Loading..." />
@@ -93,7 +67,7 @@ export default function CustomerDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <main className="min-h-screen bg-background">
       <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} ${designSystem.spacing.section}`}>
         {/* Header Section */}
         <div className="mb-6 animate-fade-in">
@@ -121,8 +95,8 @@ export default function CustomerDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Total Orders</CardTitle>
-                <div className="p-2 bg-blue-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
-                  <ShoppingCart className="h-4 w-4 text-blue-600" />
+                <div className="p-2 bg-info-light rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <ShoppingCart className="h-4 w-4 text-info" />
                 </div>
               </div>
             </CardHeader>
@@ -136,8 +110,8 @@ export default function CustomerDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Pending</CardTitle>
-                <div className="p-2 bg-yellow-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
-                  <Clock className="h-4 w-4 text-yellow-600" />
+                <div className="p-2 bg-warning-light rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <Clock className="h-4 w-4 text-warning" />
                 </div>
               </div>
             </CardHeader>
@@ -151,8 +125,8 @@ export default function CustomerDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Completed</CardTitle>
-                <div className="p-2 bg-green-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="p-2 bg-success-light rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <CheckCircle className="h-4 w-4 text-success" />
                 </div>
               </div>
             </CardHeader>
@@ -166,8 +140,8 @@ export default function CustomerDashboard() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Total Spent</CardTitle>
-                <div className="p-2 bg-purple-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                <div className="p-2 bg-primary/10 rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <TrendingUp className="h-4 w-4 text-primary" />
                 </div>
               </div>
             </CardHeader>
@@ -227,7 +201,7 @@ export default function CustomerDashboard() {
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors duration-200 flex-shrink-0">
-                          {getStatusIcon(order.status)}
+                          <Package className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`${designSystem.typography.h4} mb-1 group-hover:text-primary transition-colors duration-200 truncate`}>
@@ -250,11 +224,9 @@ export default function CustomerDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}
-                        >
+                        <StatusBadge status={order.status as any}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
+                        </StatusBadge>
                         <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
                       </div>
                     </div>

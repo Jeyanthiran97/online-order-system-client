@@ -19,6 +19,8 @@ import Link from "next/link";
 import { designSystem } from "@/lib/design-system";
 import { useToast } from "@/components/ui/use-toast";
 import { getErrorMessage } from "@/lib/errorHandler";
+import { AlertBanner } from "@/components/ui/alert-banner";
+import { HeroSection } from "@/components/ui/hero-section";
 
 export default function HomePage() {
   const router = useRouter();
@@ -173,7 +175,7 @@ export default function HomePage() {
   // Show loading or nothing while redirecting
   if (authLoading || (isAuthenticated && user && (user.role === "seller" || user.role === "deliverer" || user.role === "admin"))) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
@@ -185,57 +187,34 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Server Error Banner */}
       {(serverError || categoriesError) && (
-        <div className="bg-red-50 border-b border-red-200">
-          <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} py-3`}>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1">
-                <WifiOff className="h-5 w-5 text-red-600 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-red-900">
-                    {serverError || categoriesError}
-                  </p>
-                  <p className="text-xs text-red-700 mt-0.5">
-                    Some features may be unavailable. Please check your connection or try again later.
-                  </p>
-                </div>
-              </div>
-              {(serverError || categoriesError) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (serverError) loadProducts();
-                    if (categoriesError) loadCategories();
-                  }}
-                  className="border-red-300 text-red-700 hover:bg-red-100 flex-shrink-0"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
+        <AlertBanner
+          variant="error"
+          title={serverError || categoriesError}
+          description="Some features may be unavailable. Please check your connection or try again later."
+          onRetry={() => {
+            if (serverError) loadProducts();
+            if (categoriesError) loadCategories();
+          }}
+          showIcon={true}
+        />
       )}
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20" />
-        <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} py-16 md:py-24 relative z-10`}>
+      <HeroSection>
+        <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} py-16 md:py-24`}>
           <div className="max-w-3xl mx-auto text-center space-y-5 animate-fade-in">
             <h1 className={`${designSystem.typography.h1} leading-tight`}>
               Discover Amazing
-              <span className="block bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent mt-2">
+              <span className="block bg-gradient-to-r from-hero-text via-hero-accent-1/80 to-hero-accent-2/80 bg-clip-text text-transparent mt-2">
                 Products
               </span>
             </h1>
-            <p className={`${designSystem.typography.body} text-white/90 max-w-2xl mx-auto text-base sm:text-lg`}>
+            <p className={`${designSystem.typography.body} text-hero-text/90 max-w-2xl mx-auto text-base sm:text-lg`}>
               Shop from trusted sellers and get fast delivery. Your one-stop destination for quality products.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-3">
@@ -254,7 +233,7 @@ export default function HomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="bg-white/10 border-white/30 hover:bg-white/20 backdrop-blur-sm text-white hover:text-white transition-all duration-200"
+                className="bg-hero-text/10 border-hero-text/30 hover:bg-hero-text/20 backdrop-blur-sm text-hero-text hover:text-hero-text transition-all duration-200"
                 asChild
               >
                 <Link href="/seller/register">
@@ -264,11 +243,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent" />
-      </section>
+      </HeroSection>
 
       {/* Features Section */}
-      <section className="py-10 bg-white/50">
+      <section className="py-10 bg-surface">
         <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding}`}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className={`flex items-start gap-3 ${designSystem.card.base} ${designSystem.card.hover} p-5 group`}>
@@ -403,8 +381,8 @@ export default function HomePage() {
             </div>
           ) : serverError ? (
             <div className="text-center py-12">
-              <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-3 opacity-75" />
-              <p className={`${designSystem.typography.body} text-gray-700 mb-1 font-medium`}>
+              <AlertCircle className="h-12 w-12 text-warning mx-auto mb-3 opacity-75" />
+              <p className={`${designSystem.typography.body} text-foreground mb-1 font-medium`}>
                 Unable to load products
               </p>
               <p className={`${designSystem.typography.small} text-muted-foreground mb-4`}>

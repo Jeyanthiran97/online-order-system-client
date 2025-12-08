@@ -68,7 +68,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-muted/80 via-muted/60 to-muted/80">
         {/* Discount/Promotion Label */}
         {hasDiscount && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-10">
+          <div className="absolute top-2 left-2 bg-discount-bg text-discount-text px-2 py-1 rounded-md flex items-center gap-1 shadow-lg z-10">
             <Tag className="h-3 w-3" />
             <span className="text-xs font-bold">{discountValue}% OFF</span>
           </div>
@@ -109,7 +109,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         )}
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       </div>
 
@@ -152,8 +152,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     key={i}
                     className={`h-3 w-3 ${
                       i < filledStars
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'fill-gray-200 text-gray-200'
+                        ? 'fill-rating-filled text-rating-filled'
+                        : 'fill-rating-empty text-rating-empty'
                     }`}
                   />
                 ))}
@@ -163,7 +163,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* Stock Status */}
           {isOutOfStock ? (
-            <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
+            <div className="flex items-center gap-1 text-destructive">
               <XCircle className="h-3 w-3" />
               <span className="text-xs font-medium">Out of Stock</span>
             </div>

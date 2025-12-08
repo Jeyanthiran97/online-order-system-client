@@ -54,7 +54,7 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r bg-white">
+    <div className="flex h-screen w-64 flex-col border-r bg-background">
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/" className="text-xl font-bold text-primary">
           Online Store

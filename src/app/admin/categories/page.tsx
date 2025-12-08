@@ -24,6 +24,7 @@ import {
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { categorySchema, type CategoryFormData } from "@/lib/validations";
 import { getErrorMessage, isCommonError, mapServerErrorsToFields } from "@/lib/errorHandler";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -189,15 +190,9 @@ export default function AdminCategoriesPage() {
                     <TableCell className="font-medium capitalize">{category.name}</TableCell>
                     <TableCell>{category.description || "-"}</TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          category.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
+                      <StatusBadge status={category.isActive ? "active" : "inactive"}>
                         {category.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

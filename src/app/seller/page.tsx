@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/AuthContext";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function SellerDashboard() {
   const { loading: authLoading } = useAuth();
@@ -50,12 +51,16 @@ export default function SellerDashboard() {
       if (ordersRes.success) {
         const ordersData = ordersRes.data || [];
         setOrders(ordersData);
-        const totalSales = ordersData.reduce((sum: number, o: Order) => sum + o.totalAmount, 0);
+        const totalSales = ordersData.reduce(
+          (sum: number, o: Order) => sum + o.totalAmount,
+          0
+        );
         setStats((prev) => ({
           ...prev,
           totalOrders: ordersData.length,
           totalSales,
-          pendingOrders: ordersData.filter((o: Order) => o.status === "pending").length,
+          pendingOrders: ordersData.filter((o: Order) => o.status === "pending")
+            .length,
         }));
       }
     } catch (error) {
@@ -114,7 +119,9 @@ export default function SellerDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{formatCurrency(stats.totalSales)}</p>
+            <p className="text-3xl font-bold">
+              {formatCurrency(stats.totalSales)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -146,16 +153,25 @@ export default function SellerDashboard() {
                 <LoadingSpinner text="Loading products..." />
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No products yet</div>
+              <div className="text-center py-8 text-muted-foreground">
+                No products yet
+              </div>
             ) : (
               <div className="space-y-2">
                 {products.map((product) => (
-                  <div key={product._id} className="flex items-center justify-between p-2 border rounded">
+                  <div
+                    key={product._id}
+                    className="flex items-center justify-between p-2 border rounded"
+                  >
                     <div>
                       <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">{formatCurrency(product.price)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCurrency(product.price)}
+                      </p>
                     </div>
-                    <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
+                    <span className="text-sm text-muted-foreground">
+                      Stock: {product.stock}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -178,26 +194,27 @@ export default function SellerDashboard() {
                 <LoadingSpinner text="Loading orders..." />
               </div>
             ) : orders.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No orders yet</div>
+              <div className="text-center py-8 text-muted-foreground">
+                No orders yet
+              </div>
             ) : (
               <div className="space-y-2">
                 {orders.map((order) => (
-                  <div key={order._id} className="flex items-center justify-between p-2 border rounded">
+                  <div
+                    key={order._id}
+                    className="flex items-center justify-between p-2 border rounded"
+                  >
                     <div>
-                      <p className="font-medium">Order #{order._id.slice(-8)}</p>
-                      <p className="text-sm text-muted-foreground">{formatCurrency(order.totalAmount)}</p>
+                      <p className="font-medium">
+                        Order #{order._id.slice(-8)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCurrency(order.totalAmount)}
+                      </p>
                     </div>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        order.status === "delivered"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
-                    >
+                    <StatusBadge status={order.status as any}>
                       {order.status}
-                    </span>
+                    </StatusBadge>
                   </div>
                 ))}
               </div>

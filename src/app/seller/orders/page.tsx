@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -104,17 +105,9 @@ export default function SellerOrdersPage() {
                     <TableCell>{order.items?.length || 0} items</TableCell>
                     <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          order.status === "delivered"
-                            ? "bg-green-100 text-green-800"
-                            : order.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
+                      <StatusBadge status={order.status as any}>
                         {order.status}
-                      </span>
+                      </StatusBadge>
                     </TableCell>
                     <TableCell>
                       {new Date(order.createdAt).toLocaleDateString()}

@@ -22,6 +22,7 @@ import {
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import { designSystem } from "@/lib/design-system";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function CustomerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -69,44 +70,13 @@ export default function CustomerOrdersPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case "pending":
-      case "confirmed":
-        return <Clock className="h-5 w-5 text-yellow-600" />;
-      case "shipped":
-        return <Truck className="h-5 w-5 text-blue-600" />;
-      case "cancelled":
-        return <XCircle className="h-5 w-5 text-red-600" />;
-      default:
-        return <Package className="h-5 w-5 text-gray-600" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "pending":
-      case "confirmed":
-        return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "shipped":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "cancelled":
-        return "bg-red-50 text-red-700 border-red-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
-  };
 
   const filteredOrdersCount = orders.filter((order) => 
     !statusFilter || order.status === statusFilter
   ).length;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <main className="min-h-screen bg-background">
       <div className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} ${designSystem.spacing.section}`}>
         {/* Header */}
         <div className="mb-6 animate-fade-in">
@@ -190,7 +160,7 @@ export default function CustomerOrdersPage() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <div className="p-2.5 bg-muted rounded-lg flex-shrink-0">
-                        {getStatusIcon(order.status)}
+                        <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <CardTitle className={`${designSystem.typography.h3} mb-1`}>
@@ -228,12 +198,9 @@ export default function CustomerOrdersPage() {
                 <CardContent>
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-4 border-t">
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium border flex items-center gap-1.5 ${getStatusColor(order.status)}`}
-                      >
-                        {getStatusIcon(order.status)}
+                      <StatusBadge status={order.status as any}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                      </StatusBadge>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {(order.status === "pending" || order.status === "confirmed") && (
