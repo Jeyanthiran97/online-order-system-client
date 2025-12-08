@@ -194,7 +194,7 @@ export default function HomePage() {
       {(serverError || categoriesError) && (
         <AlertBanner
           variant="error"
-          title={serverError || categoriesError}
+          title={(serverError || categoriesError) ?? undefined}
           description="Some features may be unavailable. Please check your connection or try again later."
           onRetry={() => {
             if (serverError) loadProducts();

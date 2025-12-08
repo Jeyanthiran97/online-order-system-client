@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { designSystem } from "@/lib/design-system";
 import { Navbar } from "@/components/layouts/Navbar";
 import { SimpleFooter } from "@/components/layouts/SimpleFooter";
+import { HeroSection } from "@/components/ui/hero-section";
 import { Truck, Mail, Lock, User, CreditCard, IdCard, Sparkles, CheckCircle2 } from "lucide-react";
 import { delivererRegisterSchema, type DelivererRegisterFormData } from "@/lib/validations";
 import { getErrorMessage, mapServerErrorsToFields } from "@/lib/errorHandler";
