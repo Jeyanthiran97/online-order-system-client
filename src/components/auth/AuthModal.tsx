@@ -96,6 +96,7 @@ export function AuthModal({
         toast({
           title: "Success",
           description: "Logged in successfully",
+          variant: "success",
         });
       }
     } catch (error: unknown) {
@@ -130,6 +131,7 @@ export function AuthModal({
           toast({
             title: "Success",
             description: "Account created and logged in successfully",
+            variant: "success",
           });
           onOpenChange(false);
           router.refresh();
@@ -138,6 +140,7 @@ export function AuthModal({
           toast({
             title: "Success",
             description: "Account created successfully. Please login.",
+            variant: "success",
           });
           setMode("login");
           resetLogin({

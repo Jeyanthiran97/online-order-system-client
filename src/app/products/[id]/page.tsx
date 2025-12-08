@@ -134,6 +134,7 @@ export default function ProductDetailPage() {
         toast({
           title: "Success",
           description: "Order placed successfully",
+          variant: "success",
         });
         router.push("/customer/orders");
       }

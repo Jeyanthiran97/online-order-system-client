@@ -45,6 +45,7 @@ export default function DelivererRegisterPage() {
         toast({
           title: "Success",
           description: response.message || "Registration submitted. Waiting for admin approval.",
+          variant: "success",
         });
         router.push("/auth/login");
       }

@@ -28,8 +28,14 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "border bg-background text-foreground",
+        success:
+          "success group border-[var(--color-success-border)] bg-[var(--color-success-light)] text-[var(--color-success-light-foreground)]",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+          "destructive group border-destructive/30 bg-destructive text-destructive-foreground",
+        warning:
+          "warning group border-[var(--color-warning-border)] bg-[var(--color-warning-light)] text-[var(--color-warning-light-foreground)]",
+        info:
+          "info group border-[var(--color-info-border)] bg-[var(--color-info-light)] text-[var(--color-info-light-foreground)]",
       },
     },
     defaultVariants: {
@@ -60,7 +66,15 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary hover:text-secondary-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      // Success variant
+      "group-[.success]:border-[var(--color-success-border)] group-[.success]:hover:bg-[var(--color-success)] group-[.success]:hover:text-[var(--color-success-foreground)] group-[.success]:focus:ring-[var(--color-success)]",
+      // Destructive variant
+      "group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+      // Warning variant
+      "group-[.warning]:border-[var(--color-warning-border)] group-[.warning]:hover:bg-[var(--color-warning)] group-[.warning]:hover:text-[var(--color-warning-foreground)] group-[.warning]:focus:ring-[var(--color-warning)]",
+      // Info variant
+      "group-[.info]:border-[var(--color-info-border)] group-[.info]:hover:bg-[var(--color-info)] group-[.info]:hover:text-[var(--color-info-foreground)] group-[.info]:focus:ring-[var(--color-info)]",
       className
     )}
     {...props}
@@ -75,7 +89,15 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-destructive-foreground/70 group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive group-[.destructive]:focus:ring-offset-destructive",
+      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100",
+      // Success variant
+      "group-[.success]:text-[var(--color-success-light-foreground)]/70 group-[.success]:hover:text-[var(--color-success-light-foreground)] group-[.success]:focus:ring-success group-[.success]:focus:ring-offset-success",
+      // Destructive variant
+      "group-[.destructive]:text-destructive-foreground/70 group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive group-[.destructive]:focus:ring-offset-destructive",
+      // Warning variant
+      "group-[.warning]:text-[var(--color-warning-light-foreground)]/70 group-[.warning]:hover:text-[var(--color-warning-light-foreground)] group-[.warning]:focus:ring-warning group-[.warning]:focus:ring-offset-warning",
+      // Info variant
+      "group-[.info]:text-[var(--color-info-light-foreground)]/70 group-[.info]:hover:text-[var(--color-info-light-foreground)] group-[.info]:focus:ring-info group-[.info]:focus:ring-offset-info",
       className
     )}
     toast-close=""

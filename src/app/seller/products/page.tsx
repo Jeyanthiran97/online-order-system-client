@@ -244,12 +244,14 @@ export default function SellerProductsPage() {
         toast({
           title: "Success",
           description: "Product updated successfully",
+          variant: "success",
         });
       } else {
         await productService.createProduct(apiData);
         toast({
           title: "Success",
           description: "Product created successfully",
+          variant: "success",
         });
       }
 
@@ -333,6 +335,7 @@ export default function SellerProductsPage() {
       toast({
         title: "Success",
         description: "Product deleted successfully",
+        variant: "success",
       });
       loadProducts();
     } catch (error: unknown) {

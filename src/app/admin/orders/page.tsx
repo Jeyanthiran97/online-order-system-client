@@ -55,6 +55,7 @@ export default function AdminOrdersPage() {
         toast({
           title: "Success",
           description: "Deliverer assigned successfully",
+          variant: "success",
         });
         loadData();
       }
@@ -74,6 +75,7 @@ export default function AdminOrdersPage() {
         toast({
           title: "Success",
           description: `Order status updated to ${newStatus}`,
+          variant: "success",
         });
         loadData();
       }

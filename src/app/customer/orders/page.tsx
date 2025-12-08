@@ -58,6 +58,7 @@ export default function CustomerOrdersPage() {
         toast({
           title: "Success",
           description: "Order cancelled successfully",
+          variant: "success",
         });
         loadOrders();
       }

@@ -127,6 +127,7 @@ export default function AdminDeliverersPage() {
         toast({
           title: "Success",
           description: `Deliverer ${statusModal.type === "approve" ? "approved" : "rejected"} successfully`,
+          variant: "success",
         });
         closeStatusModal();
         loadDeliverers();

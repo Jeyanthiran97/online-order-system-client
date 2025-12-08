@@ -40,6 +40,7 @@ export default function CustomerProfilePage() {
         toast({
           title: "Success",
           description: "Profile updated successfully",
+          variant: "success",
         });
         await refreshUser();
       }

@@ -108,12 +108,14 @@ export default function AdminCategoriesPage() {
         toast({
           title: "Success",
           description: "Category updated successfully",
+          variant: "success",
         });
       } else {
         await categoryService.createCategory(data);
         toast({
           title: "Success",
           description: "Category created successfully",
+          variant: "success",
         });
       }
       closeModal();
@@ -144,6 +146,7 @@ export default function AdminCategoriesPage() {
       toast({
         title: "Success",
         description: "Category deleted successfully",
+        variant: "success",
       });
       loadCategories();
     } catch (error: unknown) {

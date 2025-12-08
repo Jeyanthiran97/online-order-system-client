@@ -25,7 +25,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div className="space-y-3">
-            <Link href="/" className={`flex items-center gap-2 ${designSystem.typography.h3} hover:text-primary transition-colors duration-200`}>
+            <Link href="/" className={`flex items-center gap-2 ${designSystem.typography.h3} text-footer-text hover:text-secondary transition-colors duration-200`}>
               <ShoppingBag className="h-5 w-5" />
               <span>Online Store</span>
             </Link>
@@ -69,23 +69,23 @@ export function Footer() {
             <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <span>Home</span>
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/products" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <span>Products</span>
                 </Link>
               </li>
               <li>
-                <Link href="/seller/register" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/seller/register" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <Store className="h-4 w-4" />
                   <span>Become a Seller</span>
                 </Link>
               </li>
               <li>
-                <Link href="/deliverer/register" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/deliverer/register" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <Truck className="h-4 w-4" />
                   <span>Join as Deliverer</span>
                 </Link>
@@ -98,24 +98,24 @@ export function Footer() {
             <h3 className="font-semibold text-lg mb-4">Customer Support</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/customer/orders" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/customer/orders" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4" />
                   <span>My Orders</span>
                 </Link>
               </li>
               <li>
-                <Link href="/customer/profile" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <Link href="/customer/profile" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>My Profile</span>
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <a href="#" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <span>Help Center</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="text-footer-text-muted hover:text-primary transition-colors text-sm flex items-center gap-2">
+                <a href="#" className="text-footer-text-muted hover:text-secondary transition-colors text-sm flex items-center gap-2">
                   <span>Contact Us</span>
                 </a>
               </li>
@@ -132,13 +132,13 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-footer-text-muted text-sm">
                 <Phone className="h-5 w-5 flex-shrink-0" />
-                <a href="tel:+1234567890" className="hover:text-primary transition-colors">
+                <a href="tel:+1234567890" className="hover:text-secondary transition-colors">
                   +1 (234) 567-890
                 </a>
               </li>
               <li className="flex items-center gap-3 text-footer-text-muted text-sm">
                 <Mail className="h-5 w-5 flex-shrink-0" />
-                <a href="mailto:support@onlinestore.com" className="hover:text-primary transition-colors">
+                <a href="mailto:support@onlinestore.com" className="hover:text-secondary transition-colors">
                   support@onlinestore.com
                 </a>
               </li>
@@ -153,13 +153,13 @@ export function Footer() {
               © {currentYear} Online Store. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <Link href="#" className="text-footer-text-subtle hover:text-primary transition-colors">
+              <Link href="#" className="text-footer-text-subtle hover:text-secondary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-footer-text-subtle hover:text-primary transition-colors">
+              <Link href="#" className="text-footer-text-subtle hover:text-secondary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="#" className="text-footer-text-subtle hover:text-primary transition-colors">
+              <Link href="#" className="text-footer-text-subtle hover:text-secondary transition-colors">
                 Cookie Policy
               </Link>
             </div>

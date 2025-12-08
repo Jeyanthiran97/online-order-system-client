@@ -125,6 +125,7 @@ export default function AdminSellersPage() {
         toast({
           title: "Success",
           description: `Seller ${statusModal.type === "approve" ? "approved" : "rejected"} successfully`,
+          variant: "success",
         });
         closeStatusModal();
         loadSellers();

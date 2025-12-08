@@ -45,6 +45,7 @@ export default function SellerOrdersPage() {
         toast({
           title: "Success",
           description: "Order status updated successfully",
+          variant: "success",
         });
         loadOrders();
       }

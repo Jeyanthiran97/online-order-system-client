@@ -45,6 +45,7 @@ export default function DelivererDeliveriesPage() {
         toast({
           title: "Success",
           description: "Delivery status updated successfully",
+          variant: "success",
         });
         loadDeliveries();
       }
