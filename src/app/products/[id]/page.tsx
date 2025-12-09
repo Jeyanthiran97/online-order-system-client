@@ -17,21 +17,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { orderService } from "@/services/order.service";
+import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { addToCart } = useCart();
   const { toast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [ordering, setOrdering] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     // Redirect sellers, deliverers, and admins away from public routes
@@ -96,57 +99,37 @@ export default function ProductDetailPage() {
 
   const images = getProductImages();
 
-  const handleOrder = async () => {
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    // If not logged in, open auth modal
     if (!isAuthenticated || user?.role !== "customer") {
-      toast({
-        title: "Login Required",
-        description: "Please login as a customer to place orders",
-        variant: "destructive",
-      });
-      router.push("/auth/login");
+      setAuthModalOpen(true);
       return;
     }
 
-    if (!user.profile?.address) {
-      toast({
-        title: "Address Required",
-        description: "Please update your address in your profile",
-        variant: "destructive",
-      });
-      router.push("/customer/profile");
-      return;
-    }
-
-    setOrdering(true);
+    setAddingToCart(true);
     try {
-      const response = await orderService.createOrder({
-        items: [
-          {
-            productId: product!._id,
-            quantity,
-            price: product!.price,
-          },
-        ],
-        shippingAddress: user.profile.address,
-      });
-
-      if (response.success) {
-        toast({
-          title: "Success",
-          description: "Order placed successfully",
-          variant: "success",
-        });
-        router.push("/customer/orders");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to place order",
-        variant: "destructive",
-      });
+      await addToCart(product._id, quantity, true);
+      setQuantity(1); // Reset quantity after adding
+    } catch (error) {
+      // Error is handled in CartContext
     } finally {
-      setOrdering(false);
+      setAddingToCart(false);
     }
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    // If not logged in, open auth modal
+    if (!isAuthenticated || user?.role !== "customer") {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    // Redirect to order page with product details
+    router.push(`/cart?buyNow=${product._id}&quantity=${quantity}`);
   };
 
   // Show loading or redirect if user is seller/deliverer/admin
@@ -296,51 +279,69 @@ export default function ProductDetailPage() {
                       </p>
                     )}
                 </div>
-                {isAuthenticated && user?.role === "customer" && (
-                  <div className="space-y-4 pt-4 border-t">
-                    <div className="space-y-2">
-                      <Label htmlFor="quantity">Quantity</Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        min="1"
-                        max={product.stock}
-                        value={quantity}
-                        onChange={(e) =>
-                          setQuantity(
-                            Math.max(
-                              1,
-                              Math.min(
-                                product.stock,
-                                parseInt(e.target.value) || 1
-                              )
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min="1"
+                      max={product.stock}
+                      value={quantity}
+                      onChange={(e) =>
+                        setQuantity(
+                          Math.max(
+                            1,
+                            Math.min(
+                              product.stock,
+                              parseInt(e.target.value) || 1
                             )
                           )
-                        }
-                      />
-                    </div>
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="flex gap-3">
                     <Button
-                      className="w-full"
-                      onClick={handleOrder}
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handleBuyNow}
                       disabled={
-                        ordering ||
                         product.stock === 0 ||
                         quantity > product.stock
                       }
                     >
-                      {ordering
-                        ? "Placing Order..."
+                      {product.stock === 0
+                        ? "Out of Stock"
+                        : "Buy Now"}
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={handleAddToCart}
+                      disabled={
+                        addingToCart ||
+                        product.stock === 0 ||
+                        quantity > product.stock
+                      }
+                    >
+                      {addingToCart
+                        ? "Adding..."
                         : product.stock === 0
                         ? "Out of Stock"
                         : "Add to Cart"}
                     </Button>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        initialMode="login"
+      />
     </div>
   );
 }

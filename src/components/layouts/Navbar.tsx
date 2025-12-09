@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, LogOut, ShoppingBag, Menu, X } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -10,6 +11,7 @@ import { designSystem } from "@/lib/design-system";
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { itemCount } = useCart();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
   const [scrolled, setScrolled] = useState(false);
@@ -60,6 +62,19 @@ export function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Cart - Always visible */}
+            <Link href={isAuthenticated && user?.role === "customer" ? "/cart" : "/auth/login"}>
+              <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors relative">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Cart
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {!isAuthenticated ? (
               <>
                 <Link href="/seller/register">
@@ -91,7 +106,6 @@ export function Navbar() {
                     </Link>
                     <Link href="/customer/orders">
                       <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors">
-                        <ShoppingCart className="mr-2 h-4 w-4" />
                         Orders
                       </Button>
                     </Link>
@@ -128,6 +142,19 @@ export function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden pb-4 space-y-2 animate-fade-in">
+            {/* Cart - Always visible */}
+            <Link href={isAuthenticated && user?.role === "customer" ? "/cart" : "/auth/login"} onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start relative">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Cart
+                {itemCount > 0 && (
+                  <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
             {!isAuthenticated ? (
               <>
                 <Link href="/seller/register" onClick={() => setMobileMenuOpen(false)}>
@@ -159,7 +186,6 @@ export function Navbar() {
                     </Link>
                     <Link href="/customer/orders" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start">
-                        <ShoppingCart className="mr-2 h-4 w-4" />
                         Orders
                       </Button>
                     </Link>

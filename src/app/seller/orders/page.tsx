@@ -119,24 +119,23 @@ export default function SellerOrdersPage() {
                           size="sm"
                           onClick={() => handleUpdateStatus(order._id, "confirmed")}
                         >
-                          Confirm
+                          Confirm Order
                         </Button>
                       )}
                       {order.status === "confirmed" && (
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleUpdateStatus(order._id, "shipped")}
-                            disabled={!order.delivererId}
-                          >
-                            Ship
-                          </Button>
-                          {!order.delivererId && (
-                            <span className="text-xs text-muted-foreground">
-                              Admin must assign deliverer
-                            </span>
-                          )}
-                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          Waiting for admin to assign deliverer and ship
+                        </span>
+                      )}
+                      {order.status === "shipped" && (
+                        <span className="text-sm text-muted-foreground">
+                          Order shipped - awaiting delivery
+                        </span>
+                      )}
+                      {(order.status === "delivered" || order.status === "cancelled") && (
+                        <span className="text-sm text-muted-foreground capitalize">
+                          {order.status}
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>

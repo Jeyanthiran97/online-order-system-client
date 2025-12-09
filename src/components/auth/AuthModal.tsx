@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { authService } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export function AuthModal({
 }: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const { login } = useAuth();
+  const { refreshCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -93,6 +95,10 @@ export function AuthModal({
         onOpenChange(false);
         // The login function in AuthContext handles navigation
         await login(response.data.token, response.data.user);
+        // Refresh cart to process pending items
+        if (response.data.user.role === "customer") {
+          await refreshCart();
+        }
         toast({
           title: "Success",
           description: "Logged in successfully",
@@ -128,6 +134,10 @@ export function AuthModal({
         if (response.data?.token) {
           // Auto-login if token is provided
           await login(response.data.token, response.data.user);
+          // Refresh cart to process pending items
+          if (response.data.user.role === "customer") {
+            await refreshCart();
+          }
           toast({
             title: "Success",
             description: "Account created and logged in successfully",
