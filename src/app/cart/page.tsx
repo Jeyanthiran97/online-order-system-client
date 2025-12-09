@@ -20,6 +20,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, CreditCard } from "lucid
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { orderService } from "@/services/order.service";
+import { paymentService } from "@/services/payment.service";
 import { useToast } from "@/components/ui/use-toast";
 import { Product } from "@/types/product";
 
@@ -160,6 +161,39 @@ function CartPageContent() {
       });
     } finally {
       setProcessing(false);
+    }
+  };
+
+  const handleStripeCheckout = async () => {
+    if (!cart || cart.items.length === 0) return;
+
+    setProcessing(true);
+    try {
+      const items = cart.items.map((item) => ({
+        productId: typeof item.productId === 'string' ? item.productId : item.productId._id,
+        quantity: item.quantity,
+      }));
+
+      const { url } = await paymentService.createCheckoutSession(items);
+      
+      // Redirect to Stripe Checkout
+      window.location.href = url;
+    } catch (error: any) {
+      console.error("Stripe checkout error:", error);
+      toast({
+        title: "Checkout Failed",
+        description: error.response?.data?.error || "Failed to initiate checkout",
+        variant: "destructive",
+      });
+      setProcessing(false);
+    }
+  };
+
+  const onCheckoutClick = () => {
+    if (paymentMethod === "stripe") {
+      handleStripeCheckout();
+    } else {
+      handleCheckout();
     }
   };
 
@@ -322,12 +356,14 @@ function CartPageContent() {
                     <option value="dummy">Dummy Payment (Always Success)</option>
                     <option value="card">Credit/Debit Card</option>
                     <option value="cash">Cash on Delivery</option>
+                    <option value="stripe">Stripe (Online Payment)</option>
                   </select>
                 </div>
 
+
                 <Button
                   className="w-full"
-                  onClick={handleCheckout}
+                  onClick={onCheckoutClick}
                   disabled={processing}
                 >
                   {processing ? (
