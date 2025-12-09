@@ -17,7 +17,7 @@ export type { UserRole };
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (token: string, userData: User) => Promise<void>;
+  login: (token: string, userData: User, skipRedirect?: boolean, redirectTo?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (token: string, userData: User) => {
+  const login = async (token: string, userData: User, skipRedirect: boolean = false, redirectTo?: string) => {
     Cookies.set("token", token, { expires: 7 }); // 7 days
     Cookies.set("user", JSON.stringify(userData), { expires: 7 });
 
@@ -125,22 +125,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Redirect based on role
-      switch (fullUserData.role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "seller":
-          router.push("/seller");
-          break;
-        case "deliverer":
-          router.push("/deliverer");
-          break;
-        case "customer":
-          router.push("/customer");
-          break;
-        default:
-          router.push("/");
+      // Only redirect if skipRedirect is false
+      if (!skipRedirect) {
+        // If custom redirect path is provided, use it (only for customers)
+        if (redirectTo && fullUserData.role === "customer") {
+          router.push(redirectTo);
+        } else {
+          // Redirect based on role
+          switch (fullUserData.role) {
+            case "admin":
+              router.push("/admin");
+              break;
+            case "seller":
+              router.push("/seller");
+              break;
+            case "deliverer":
+              router.push("/deliverer");
+              break;
+            case "customer":
+              router.push("/customer");
+              break;
+            default:
+              router.push("/");
+          }
+        }
       }
     } catch (error: any) {
       // Ensure loading is false even on error

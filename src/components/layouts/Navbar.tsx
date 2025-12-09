@@ -16,6 +16,7 @@ export function Navbar() {
   const [authModalMode, setAuthModalMode] = useState<"login" | "signup">("login");
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [redirectAfterLogin, setRedirectAfterLogin] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +41,17 @@ export function Navbar() {
     setAuthModalMode("signup");
     setAuthModalOpen(true);
     setMobileMenuOpen(false);
+    setRedirectAfterLogin(undefined);
+  };
+
+  const handleCartClick = (e: React.MouseEvent) => {
+    if (!isAuthenticated || user?.role !== "customer") {
+      e.preventDefault();
+      setAuthModalMode("login");
+      setAuthModalOpen(true);
+      setRedirectAfterLogin("/cart");
+      setMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -63,8 +75,24 @@ export function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-2">
             {/* Cart - Always visible */}
-            <Link href={isAuthenticated && user?.role === "customer" ? "/cart" : "/auth/login"}>
-              <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors relative">
+            {isAuthenticated && user?.role === "customer" ? (
+              <Link href="/cart">
+                <Button variant="ghost" className="hover:bg-primary/10 hover:text-primary transition-colors relative">
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Cart
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount > 9 ? '9+' : itemCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                variant="ghost" 
+                className="hover:bg-primary/10 hover:text-primary transition-colors relative"
+                onClick={handleCartClick}
+              >
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Cart
                 {itemCount > 0 && (
@@ -73,7 +101,7 @@ export function Navbar() {
                   </span>
                 )}
               </Button>
-            </Link>
+            )}
 
             {!isAuthenticated ? (
               <>
@@ -143,8 +171,27 @@ export function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden pb-4 space-y-2 animate-fade-in">
             {/* Cart - Always visible */}
-            <Link href={isAuthenticated && user?.role === "customer" ? "/cart" : "/auth/login"} onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start relative">
+            {isAuthenticated && user?.role === "customer" ? (
+              <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start relative">
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Cart
+                  {itemCount > 0 && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {itemCount > 9 ? '9+' : itemCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            ) : (
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start relative"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleCartClick(e);
+                }}
+              >
                 <ShoppingCart className="mr-2 h-4 w-4" />
                 Cart
                 {itemCount > 0 && (
@@ -153,7 +200,7 @@ export function Navbar() {
                   </span>
                 )}
               </Button>
-            </Link>
+            )}
 
             {!isAuthenticated ? (
               <>
@@ -209,8 +256,14 @@ export function Navbar() {
       </div>
       <AuthModal
         open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
+        onOpenChange={(open) => {
+          setAuthModalOpen(open);
+          if (!open) {
+            setRedirectAfterLogin(undefined);
+          }
+        }}
         initialMode={authModalMode}
+        redirectAfterLogin={redirectAfterLogin}
       />
     </nav>
   );

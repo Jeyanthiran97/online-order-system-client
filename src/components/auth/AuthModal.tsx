@@ -35,12 +35,16 @@ interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialMode?: "login" | "signup";
+  skipRedirect?: boolean;
+  redirectAfterLogin?: string;
 }
 
 export function AuthModal({
   open,
   onOpenChange,
   initialMode = "login",
+  skipRedirect = false,
+  redirectAfterLogin,
 }: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const { login } = useAuth();
@@ -94,16 +98,20 @@ export function AuthModal({
         resetLogin();
         onOpenChange(false);
         // The login function in AuthContext handles navigation
-        await login(response.data.token, response.data.user);
+        // Pass skipRedirect to stay on current page if needed
+        // Pass redirectAfterLogin to redirect to specific page after login
+        await login(response.data.token, response.data.user, skipRedirect, redirectAfterLogin);
         // Refresh cart to process pending items
         if (response.data.user.role === "customer") {
           await refreshCart();
         }
-        toast({
-          title: "Success",
-          description: "Logged in successfully",
-          variant: "success",
-        });
+        if (!skipRedirect) {
+          toast({
+            title: "Success",
+            description: "Logged in successfully",
+            variant: "success",
+          });
+        }
       }
     } catch (error: unknown) {
       mapServerErrorsToFields(error, setErrorLogin, {
@@ -133,18 +141,24 @@ export function AuthModal({
         // Check if token is returned (auto-login)
         if (response.data?.token) {
           // Auto-login if token is provided
-          await login(response.data.token, response.data.user);
+          // Pass skipRedirect to stay on current page if needed
+          // Pass redirectAfterLogin to redirect to specific page after login
+          await login(response.data.token, response.data.user, skipRedirect, redirectAfterLogin);
           // Refresh cart to process pending items
           if (response.data.user.role === "customer") {
             await refreshCart();
           }
-          toast({
-            title: "Success",
-            description: "Account created and logged in successfully",
-            variant: "success",
-          });
+          if (!skipRedirect) {
+            toast({
+              title: "Success",
+              description: "Account created and logged in successfully",
+              variant: "success",
+            });
+          }
           onOpenChange(false);
-          router.refresh();
+          if (!skipRedirect) {
+            router.refresh();
+          }
         } else {
           // No token, switch to login mode
           toast({

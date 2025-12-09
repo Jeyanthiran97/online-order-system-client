@@ -18,7 +18,45 @@ import { Label } from "@/components/ui/label";
 import { Star, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { cartService } from "@/services/cart.service";
 import { useToast } from "@/components/ui/use-toast";
+
+// Import localStorage utilities
+const PENDING_CART_KEY = "pendingCartItems";
+
+interface PendingCartItem {
+  productId: string;
+  quantity: number;
+}
+
+const addPendingCartItem = (productId: string, quantity: number) => {
+  if (typeof window === "undefined") return;
+  try {
+    const items: PendingCartItem[] = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
+    const existingIndex = items.findIndex((item) => item.productId === productId);
+    
+    if (existingIndex >= 0) {
+      items[existingIndex].quantity += quantity;
+    } else {
+      items.push({ productId, quantity });
+    }
+    
+    localStorage.setItem(PENDING_CART_KEY, JSON.stringify(items));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+const removePendingCartItem = (productId: string) => {
+  if (typeof window === "undefined") return;
+  try {
+    const items: PendingCartItem[] = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
+    const filtered = items.filter((item) => item.productId !== productId);
+    localStorage.setItem(PENDING_CART_KEY, JSON.stringify(filtered));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
 import { formatCurrency } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -35,6 +73,7 @@ export default function ProductDetailPage() {
   const [addingToCart, setAddingToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingAddToCart, setPendingAddToCart] = useState<{ productId: string; quantity: number } | null>(null);
 
   useEffect(() => {
     // Redirect sellers, deliverers, and admins away from public routes
@@ -102,8 +141,12 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    // If not logged in, open auth modal
+    // If not logged in, store pending action in localStorage and state, then open auth modal
     if (!isAuthenticated || user?.role !== "customer") {
+      // Store in localStorage (will be processed by CartContext after login)
+      addPendingCartItem(product._id, quantity);
+      // Store in state (for explicit addition after login)
+      setPendingAddToCart({ productId: product._id, quantity });
       setAuthModalOpen(true);
       return;
     }
@@ -131,6 +174,56 @@ export default function ProductDetailPage() {
     // Redirect to order page with product details
     router.push(`/cart?buyNow=${product._id}&quantity=${quantity}`);
   };
+
+  // Handle post-login cart addition
+  useEffect(() => {
+    const handlePostLoginAddToCart = async () => {
+      if (pendingAddToCart && isAuthenticated && user?.role === "customer") {
+        setAddingToCart(true);
+        try {
+          // Wait for CartContext to process localStorage items (it processes them automatically)
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Check if item is already in cart (CartContext might have added it from localStorage)
+          const cartResponse = await cartService.getCart();
+          const existingItem = cartResponse.data?.items?.find((item: any) => 
+            (typeof item.productId === 'string' ? item.productId : item.productId._id) === pendingAddToCart.productId
+          );
+          
+          if (!existingItem) {
+            // Item not in cart yet, add it explicitly
+            // Remove from localStorage first to prevent duplicate
+            removePendingCartItem(pendingAddToCart.productId);
+            await addToCart(pendingAddToCart.productId, pendingAddToCart.quantity, true);
+          } else {
+            // Item already in cart (added by CartContext), just show success
+            // Remove from localStorage to clean up
+            removePendingCartItem(pendingAddToCart.productId);
+          }
+          
+          setQuantity(1);
+          toast({
+            title: "Added to Cart",
+            description: "Product added to cart successfully",
+          });
+        } catch (error) {
+          // Error is handled in CartContext, but show a message anyway
+          console.error("Failed to add product to cart after login", error);
+          toast({
+            title: "Error",
+            description: "Failed to add product to cart. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setAddingToCart(false);
+          setPendingAddToCart(null);
+        }
+      }
+    };
+
+    handlePostLoginAddToCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user, pendingAddToCart]);
 
   // Show loading or redirect if user is seller/deliverer/admin
   if (
@@ -339,8 +432,15 @@ export default function ProductDetailPage() {
       </main>
       <AuthModal
         open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
+        onOpenChange={(open) => {
+          setAuthModalOpen(open);
+          // Clear pending action if modal is closed without login
+          if (!open && !isAuthenticated) {
+            setPendingAddToCart(null);
+          }
+        }}
         initialMode="login"
+        skipRedirect={!!pendingAddToCart}
       />
     </div>
   );
