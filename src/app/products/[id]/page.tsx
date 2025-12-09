@@ -74,6 +74,7 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [pendingAddToCart, setPendingAddToCart] = useState<{ productId: string; quantity: number } | null>(null);
+  const [pendingBuyNow, setPendingBuyNow] = useState<{ productId: string; quantity: number } | null>(null);
 
   useEffect(() => {
     // Redirect sellers, deliverers, and admins away from public routes
@@ -165,13 +166,14 @@ export default function ProductDetailPage() {
   const handleBuyNow = () => {
     if (!product) return;
 
-    // If not logged in, open auth modal
+    // If not logged in, store buy now info and open auth modal
     if (!isAuthenticated || user?.role !== "customer") {
+      setPendingBuyNow({ productId: product._id, quantity });
       setAuthModalOpen(true);
       return;
     }
 
-    // Redirect to order page with product details
+    // Redirect to cart page with product details
     router.push(`/cart?buyNow=${product._id}&quantity=${quantity}`);
   };
 
@@ -434,13 +436,15 @@ export default function ProductDetailPage() {
         open={authModalOpen}
         onOpenChange={(open) => {
           setAuthModalOpen(open);
-          // Clear pending action if modal is closed without login
+          // Clear pending actions if modal is closed without login
           if (!open && !isAuthenticated) {
             setPendingAddToCart(null);
+            setPendingBuyNow(null);
           }
         }}
         initialMode="login"
-        skipRedirect={!!pendingAddToCart}
+        skipRedirect={!!pendingAddToCart && !pendingBuyNow}
+        redirectAfterLogin={pendingBuyNow ? `/cart?buyNow=${pendingBuyNow.productId}&quantity=${pendingBuyNow.quantity}` : undefined}
       />
     </div>
   );

@@ -204,7 +204,7 @@ export default function CustomerOrdersPage() {
                       </StatusBadge>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {(order.status === "pending" || order.status === "confirmed") && (
+                      {(order.status === "pending") && (
                         <Button
                           variant="destructive"
                           onClick={() => handleCancel(order._id)}

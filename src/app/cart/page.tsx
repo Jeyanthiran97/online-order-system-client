@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layouts/Navbar";
 import { useCart } from "@/contexts/CartContext";
@@ -32,18 +32,43 @@ function CartPageContent() {
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("dummy");
   const [initializing, setInitializing] = useState(true);
+  const buyNowProcessedRef = useRef<string | null>(null);
 
-  // Handle "Buy Now" functionality
+  // Handle "Buy Now" functionality - only run once when component mounts with buyNow params
   useEffect(() => {
     const buyNowProductId = searchParams.get("buyNow");
     const buyNowQuantity = searchParams.get("quantity");
 
-    if (buyNowProductId && buyNowQuantity && isAuthenticated && user?.role === "customer") {
+    // Reset processed ref when query params are removed
+    if (!buyNowProductId) {
+      buyNowProcessedRef.current = null;
+      if (!loading) {
+        setInitializing(false);
+      }
+      return;
+    }
+
+    // Only process if we have params, user is authenticated, and we haven't processed this product yet
+    if (
+      buyNowProductId && 
+      buyNowQuantity && 
+      isAuthenticated && 
+      user?.role === "customer" &&
+      buyNowProcessedRef.current !== buyNowProductId &&
+      !loading
+    ) {
+      // Mark as processed immediately to prevent duplicate additions
+      buyNowProcessedRef.current = buyNowProductId;
+      
       // Add product to cart and proceed to checkout
       const addAndCheckout = async () => {
         try {
           await addToCart(buyNowProductId, parseInt(buyNowQuantity), true);
-          // Remove query params
+          // Wait a bit for cart to update
+          await new Promise(resolve => setTimeout(resolve, 300));
+          // Refresh cart to get latest state
+          await refreshCart();
+          // Remove query params after adding
           router.replace("/cart");
           toast({
             title: "Added to Cart",
@@ -51,12 +76,18 @@ function CartPageContent() {
           });
         } catch (error) {
           console.error("Failed to add product for buy now", error);
+          // Reset processed ref on error so user can retry
+          buyNowProcessedRef.current = null;
+        } finally {
+          setInitializing(false);
         }
       };
       addAndCheckout();
+    } else if (!buyNowProductId && !loading) {
+      setInitializing(false);
     }
-    setInitializing(false);
-  }, [searchParams, isAuthenticated, user, router, addToCart, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.toString(), isAuthenticated, user?.role]);
 
   useEffect(() => {
     if (!initializing && (!isAuthenticated || user?.role !== "customer")) {
@@ -179,7 +210,7 @@ function CartPageContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {cart.items.map((item) => {
+                {cart.items.map((item, index) => {
                   const product = typeof item.productId === 'object' 
                     ? item.productId as Product 
                     : null;
@@ -189,9 +220,13 @@ function CartPageContent() {
                   
                   if (!product) return null;
 
+                  // Use combination of productId and index to ensure unique keys
+                  // This handles cases where same product might appear multiple times (shouldn't happen, but safe)
+                  const uniqueKey = `${productId}-${index}`;
+
                   return (
                     <div
-                      key={productId}
+                      key={uniqueKey}
                       className="flex gap-4 p-4 border rounded-lg"
                     >
                       <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
