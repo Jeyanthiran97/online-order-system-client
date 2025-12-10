@@ -20,7 +20,10 @@ export default function CustomerDashboard() {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
-    completed: 0,
+    confirmed: 0,
+    shipped: 0,
+    delivered: 0,
+    cancelled: 0,
     totalSpent: 0,
   });
 
@@ -33,15 +36,32 @@ export default function CustomerDashboard() {
 
   const loadOrders = async () => {
     try {
-      const response = await orderService.getOrders({ limit: 5, sort: "-createdAt" });
-      if (response.success) {
-        const ordersData = response.data || [];
-        setOrders(ordersData);
-        const totalSpent = ordersData.reduce((sum: number, order: Order) => sum + (order.totalAmount || 0), 0);
+      // Fetch recent orders for the list
+      const recentResponse = await orderService.getOrders({ limit: 5, sort: "-createdAt" });
+      if (recentResponse.success) {
+        setOrders(recentResponse.data || []);
+      }
+
+      // Fetch all orders for stats
+      // Using a high limit to ensure we get all orders for accurate stats
+      // Ideally, backend should provide a stats endpoint
+      const allOrdersResponse = await orderService.getOrders({ limit: 1000 });
+      if (allOrdersResponse.success) {
+        const allOrders = allOrdersResponse.data || [];
+        const totalSpent = allOrders.reduce((sum: number, order: Order) => {
+            if (order.status !== 'cancelled') {
+                return sum + (order.totalAmount || 0);
+            }
+            return sum;
+        }, 0);
+        
         setStats({
-          total: ordersData.length,
-          pending: ordersData.filter((o: Order) => o.status === "pending" || o.status === "confirmed").length,
-          completed: ordersData.filter((o: Order) => o.status === "delivered").length,
+          total: allOrders.length,
+          pending: allOrders.filter((o: Order) => o.status === "pending").length,
+          confirmed: allOrders.filter((o: Order) => o.status === "confirmed").length,
+          shipped: allOrders.filter((o: Order) => o.status === "shipped" || o.status === "in-transit").length,
+          delivered: allOrders.filter((o: Order) => o.status === "delivered").length,
+          cancelled: allOrders.filter((o: Order) => o.status === "cancelled").length,
           totalSpent,
         });
       }
@@ -90,7 +110,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className={`${designSystem.grid.stats} mb-6`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "0ms" }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -106,7 +126,7 @@ export default function CustomerDashboard() {
             </CardContent>
           </Card>
 
-          <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "100ms" }}>
+          <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "50ms" }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Pending</CardTitle>
@@ -117,22 +137,67 @@ export default function CustomerDashboard() {
             </CardHeader>
             <CardContent>
               <p className={`${designSystem.typography.h2} mb-1`}>{stats.pending}</p>
-              <p className={designSystem.typography.small}>In progress</p>
+              <p className={designSystem.typography.small}>Awaiting processing</p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "100ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Confirmed</CardTitle>
+                <div className="p-2 bg-blue-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <CheckCircle className="h-4 w-4 text-blue-600" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className={`${designSystem.typography.h2} mb-1`}>{stats.confirmed}</p>
+              <p className={designSystem.typography.small}>Processing</p>
+            </CardContent>
+          </Card>
+
+          <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "150ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Shipped</CardTitle>
+                <div className="p-2 bg-purple-100 rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <Truck className="h-4 w-4 text-purple-600" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className={`${designSystem.typography.h2} mb-1`}>{stats.shipped}</p>
+              <p className={designSystem.typography.small}>On the way</p>
             </CardContent>
           </Card>
 
           <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "200ms" }}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Completed</CardTitle>
+                <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Delivered</CardTitle>
                 <div className="p-2 bg-success-light rounded-lg transition-transform duration-200 group-hover:scale-110">
                   <CheckCircle className="h-4 w-4 text-success" />
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className={`${designSystem.typography.h2} mb-1`}>{stats.completed}</p>
-              <p className={designSystem.typography.small}>Delivered</p>
+              <p className={`${designSystem.typography.h2} mb-1`}>{stats.delivered}</p>
+              <p className={designSystem.typography.small}>Completed</p>
+            </CardContent>
+          </Card>
+
+           <Card className={`${designSystem.card.base} ${designSystem.card.hover} animate-scale-in`} style={{ animationDelay: "250ms" }}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className={`${designSystem.typography.small} font-medium ${designSystem.typography.muted}`}>Cancelled</CardTitle>
+                <div className="p-2 bg-destructive/10 rounded-lg transition-transform duration-200 group-hover:scale-110">
+                  <Package className="h-4 w-4 text-destructive" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className={`${designSystem.typography.h2} mb-1`}>{stats.cancelled}</p>
+              <p className={designSystem.typography.small}>Cancelled orders</p>
             </CardContent>
           </Card>
 
@@ -147,7 +212,7 @@ export default function CustomerDashboard() {
             </CardHeader>
             <CardContent>
               <p className={`${designSystem.typography.h2} mb-1`}>{formatCurrency(stats.totalSpent)}</p>
-              <p className={designSystem.typography.small}>All orders</p>
+              <p className={designSystem.typography.small}>Active orders</p>
             </CardContent>
           </Card>
         </div>
@@ -190,47 +255,48 @@ export default function CustomerDashboard() {
             ) : (
               <div className="space-y-3">
                 {orders.map((order, index) => (
-                  <Link 
-                    key={order._id} 
-                    href={`/customer/orders/${order._id}`}
-                    className="block"
+                  <div
+                    key={order._id}
+                    className={`flex items-center justify-between ${designSystem.card.base} ${designSystem.card.hover} p-4 border-2 hover:border-primary/50 group animate-fade-in`}
+                    style={{ animationDelay: `${(index + 1) * 50}ms` }}
                   >
-                    <div
-                      className={`flex items-center justify-between ${designSystem.card.base} ${designSystem.card.hover} p-4 border-2 hover:border-primary/50 group cursor-pointer animate-fade-in`}
-                      style={{ animationDelay: `${(index + 1) * 50}ms` }}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors duration-200 flex-shrink-0">
-                          <Package className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`${designSystem.typography.h4} mb-1 group-hover:text-primary transition-colors duration-200 truncate`}>
-                            Order #{order._id.slice(-8).toUpperCase()}
-                          </p>
-                          <div className="flex items-center gap-3 text-muted-foreground flex-wrap">
-                            <span className={`flex items-center gap-1 ${designSystem.typography.small}`}>
-                              <Package className="h-3 w-3 flex-shrink-0" />
-                              {order.items?.length || 0} items
-                            </span>
-                            <span className={designSystem.typography.small}>•</span>
-                            <span className={`${designSystem.typography.small} font-semibold text-foreground`}>
-                              {formatCurrency(order.totalAmount)}
-                            </span>
-                            <span className={designSystem.typography.small}>•</span>
-                            <span className={designSystem.typography.small}>
-                              {new Date(order.createdAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors duration-200 flex-shrink-0">
+                        <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <StatusBadge status={order.status as any}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </StatusBadge>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/customer/orders/${order._id}`} className="hover:underline">
+                            <p className={`${designSystem.typography.h4} mb-1 group-hover:text-primary transition-colors duration-200 truncate`}>
+                              Order #{order._id.slice(-8).toUpperCase()}
+                            </p>
+                        </Link>
+                        <div className="flex items-center gap-3 text-muted-foreground flex-wrap">
+                          <span className={`flex items-center gap-1 ${designSystem.typography.small}`}>
+                            <Package className="h-3 w-3 flex-shrink-0" />
+                            {order.items?.length || 0} items
+                          </span>
+                          <span className={designSystem.typography.small}>•</span>
+                          <span className={`${designSystem.typography.small} font-semibold text-foreground`}>
+                            {formatCurrency(order.totalAmount)}
+                          </span>
+                          <span className={designSystem.typography.small}>•</span>
+                          <span className={designSystem.typography.small}>
+                            {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </Link>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <StatusBadge status={order.status as any}>
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </StatusBadge>
+                      <Link href={`/customer/orders/${order._id}`}>
+                        <Button variant="ghost" size="icon">
+                            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

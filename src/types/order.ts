@@ -9,7 +9,7 @@ export interface Order {
   customerId: string;
   items: Array<OrderItem & { product?: any }>;
   totalAmount: number;
-  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled" | "in-transit";
   shippingAddress: string;
   delivererId?: string;
   delivery?: {

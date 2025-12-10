@@ -118,7 +118,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       <Package className="h-8 w-8 text-muted-foreground/50" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1">{item.productName || 'Product'}</h3>
+                      <h3 className="font-semibold text-lg mb-1">{item.product?.name || 'Product'}</h3>
                       <div className="flex justify-between items-end">
                         <div className="text-sm text-muted-foreground">
                           Quantity: {item.quantity} × {formatCurrency(item.price)}
