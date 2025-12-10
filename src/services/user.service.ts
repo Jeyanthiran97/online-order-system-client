@@ -95,6 +95,32 @@ export const userService = {
     const response = await apiClient.get("/analytics");
     return response.data;
   },
+
+  // Address management
+  addAddress: async (address: any) => {
+    const response = await apiClient.post("/users/address", address);
+    return response.data;
+  },
+
+  getAddresses: async () => {
+    const response = await apiClient.get("/users/address");
+    return response.data;
+  },
+
+  updateAddress: async (id: string, address: any) => {
+    const response = await apiClient.put(`/users/address/${id}`, address);
+    return response.data;
+  },
+
+  deleteAddress: async (id: string) => {
+    const response = await apiClient.delete(`/users/address/${id}`);
+    return response.data;
+  },
+
+  setDefaultAddress: async (id: string) => {
+    const response = await apiClient.patch(`/users/address/${id}/default`);
+    return response.data;
+  },
 };
 
 

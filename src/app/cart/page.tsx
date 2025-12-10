@@ -199,11 +199,7 @@ function CartPageContent() {
   };
 
   const onCheckoutClick = () => {
-    if (paymentMethod === "stripe") {
-      handleStripeCheckout();
-    } else {
-      handleCheckout();
-    }
+    router.push("/checkout");
   };
 
   if (loading || initializing) {
@@ -354,22 +350,6 @@ function CartPageContent() {
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-4 border-t">
-                  <Label htmlFor="payment">Payment Method</Label>
-                  <select
-                    id="payment"
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    <option value="dummy">Dummy Payment (Always Success)</option>
-                    <option value="card">Credit/Debit Card</option>
-                    <option value="cash">Cash on Delivery</option>
-                    <option value="stripe">Stripe (Online Payment)</option>
-                  </select>
-                </div>
-
-
                 <Button
                   className="w-full"
                   onClick={onCheckoutClick}
@@ -415,4 +395,6 @@ export default function CartPage() {
     </Suspense>
   );
 }
+
+
 

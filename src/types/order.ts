@@ -40,9 +40,10 @@ export interface OrderFilters {
 
 export interface CreateOrderData {
   items: OrderItem[];
-  shippingAddress?: string;
+  shippingAddress?: any;
   paymentMethod?: string;
   fromCart?: boolean;
+  status?: string;
 }
 
 

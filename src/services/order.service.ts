@@ -58,6 +58,8 @@ export const orderService = {
       })),
       paymentMethod: data.paymentMethod || 'dummy',
       fromCart: data.fromCart || false,
+      shippingAddress: data.shippingAddress,
+      status: data.status,
     };
     const response = await apiClient.post("/orders", backendData);
     if (response.data.success && response.data.data) {

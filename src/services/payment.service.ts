@@ -1,8 +1,8 @@
 import api from "@/lib/apiClient";
 
 export const paymentService = {
-  async createCheckoutSession(items: { productId: string; quantity: number }[]) {
-    const response = await api.post("/payments/create-checkout-session", { items });
+  async createCheckoutSession(items: { productId: string; quantity: number }[], shippingAddress: any) {
+    const response = await api.post("/payments/create-checkout-session", { items, shippingAddress });
     return response.data;
   },
 
