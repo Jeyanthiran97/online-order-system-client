@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { Navbar } from "@/components/layouts/Navbar";
 import { Footer } from "@/components/layouts/Footer";
 import { orderService } from "@/services/order.service";
 import { Order } from "@/types/order";
@@ -49,7 +48,6 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container mx-auto px-4 py-12 text-center">
           <LoadingSpinner size="lg" text="Loading order details..." />
         </div>
@@ -60,7 +58,6 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   if (!order) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container mx-auto px-4 py-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Order Not Found</h1>
           <Button onClick={() => router.push("/customer/orders")}>
@@ -73,7 +70,6 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <main className={`${designSystem.container.maxWidth} mx-auto ${designSystem.container.padding} py-8`}>
         <div className="mb-6">
           <Link href="/customer/orders">
