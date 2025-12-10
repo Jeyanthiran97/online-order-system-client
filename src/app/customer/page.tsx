@@ -192,7 +192,7 @@ export default function CustomerDashboard() {
                 {orders.map((order, index) => (
                   <Link 
                     key={order._id} 
-                    href={`/customer/orders#order-${order._id}`}
+                    href={`/customer/orders/${order._id}`}
                     className="block"
                   >
                     <div
