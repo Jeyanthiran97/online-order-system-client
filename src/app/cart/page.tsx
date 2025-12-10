@@ -173,30 +173,6 @@ function CartPageContent() {
     }
   };
 
-  const handleStripeCheckout = async () => {
-    if (!cart || cart.items.length === 0) return;
-
-    setProcessing(true);
-    try {
-      const items = cart.items.map((item) => ({
-        productId: typeof item.productId === 'string' ? item.productId : item.productId._id,
-        quantity: item.quantity,
-      }));
-
-      const { url } = await paymentService.createCheckoutSession(items);
-      
-      // Redirect to Stripe Checkout
-      window.location.href = url;
-    } catch (error: any) {
-      console.error("Stripe checkout error:", error);
-      toast({
-        title: "Checkout Failed",
-        description: error.response?.data?.error || "Failed to initiate checkout",
-        variant: "destructive",
-      });
-      setProcessing(false);
-    }
-  };
 
   const onCheckoutClick = () => {
     router.push("/checkout");
