@@ -214,7 +214,7 @@ export default function CustomerOrdersPage() {
                           Cancel Order
                         </Button>
                       )}
-                      <Link href={`/products?order=${order._id}`}>
+                      <Link href={`/customer/orders/${order._id}`}>
                         <Button variant="outline" className={`${designSystem.button.base} ${designSystem.button.hover}`}>
                           View Details
                         </Button>

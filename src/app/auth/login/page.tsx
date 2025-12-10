@@ -51,7 +51,16 @@ export default function LoginPage() {
           description: "Logged in successfully",
           variant: "success",
         });
-        router.push("/");
+        
+        // Check for return URL
+        const searchParams = new URLSearchParams(window.location.search);
+        const returnUrl = searchParams.get("returnUrl") || searchParams.get("callbackUrl");
+        
+        if (returnUrl && returnUrl.startsWith("/")) {
+          router.push(returnUrl);
+        } else {
+          router.push("/");
+        }
       }
     } catch (error: unknown) {
       // Map server errors to form fields

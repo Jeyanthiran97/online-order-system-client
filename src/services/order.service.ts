@@ -21,6 +21,8 @@ const transformOrder = (order: any): Order => {
     delivery: order.delivery,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
+    assignedDeliverer: typeof order.assignedDelivererId === 'object' ? order.assignedDelivererId : undefined,
+    payment: order.payment,
   };
 };
 

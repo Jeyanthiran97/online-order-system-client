@@ -146,11 +146,20 @@ function CartPageContent() {
       });
 
       if (response.success) {
+        // Clear cart ONLY after successful order creation
+        try {
+          await clearCart();
+        } catch (clearError) {
+          console.error("Failed to clear cart after order creation:", clearError);
+          // Don't block success flow if clearing cart fails, but maybe warn user or retry
+        }
+        
         toast({
           title: "Order Placed",
           description: "Your order has been placed successfully",
+          variant: "success",
         });
-        await clearCart();
+        
         router.push("/customer/orders");
       }
     } catch (error: any) {

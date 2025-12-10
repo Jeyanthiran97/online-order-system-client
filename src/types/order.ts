@@ -19,6 +19,16 @@ export interface Order {
   };
   createdAt: string;
   updatedAt: string;
+  assignedDeliverer?: {
+    _id: string;
+    fullName: string;
+  };
+  payment?: {
+    paymentMethod: string;
+    paymentStatus: string;
+    transactionId?: string;
+    amount: number;
+  };
 }
 
 export interface OrderFilters {
